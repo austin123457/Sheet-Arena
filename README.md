@@ -46,6 +46,17 @@ What breaks the pattern:
 
 Free-for-all with everyone: Link 71%, V 12%, Smasher 5%. Nobody beats the rest of the roster at once (solo is 0% for everyone; the crowd ends it in the first round).
 
+## Raid bosses
+
+Above the ladder sits the raid tier: everything from past the god-killers up to the moon, built as 5e monsters to fight a party, with Legendary Resistance, Legendary Actions and phases. They stay out of the ladder's matrix and free-for-all.
+
+    python battle.py raid madara                    # the boss vs all sixteen at once
+    python battle.py raid madara guy+itachi+slayer  # vs a party
+
+- **Madara Uchiha** (`Madara_Uchiha_Raid.pdf`), CR 30 in two phases. Phase 1 is the Edo Tensei body: 700 HP regrowing 50 a turn, never killed by damage (at 0 it's pinned and Phase 2 starts), ended only by a seal: Itachi's Totsuka, through three Legendary Resistances. Phase 2 is the Ten-Tails jinchūriki: 900 HP, spells don't take, nothing under 100 damage in one hit does anything (Night Guy does), no instant kills, and on his fourth turn the Infinite Tsukuyomi takes everyone not under a Susanoo.
+- Against the whole ladder he wins every time: the party burns Phase 1 too fast for the seal and can't finish Phase 2 before the moon. Slow parties stall into forty-round draws, and Itachi's seal lands about once in a hundred. Ten-Tails Madara fought on even terms with Six Paths Naruto, who tanks a moon-splitting beam in *The Last*, so the ladder isn't the tier that beats him.
+- The raid tier is sized to the moon: next up are the Raditz-saga Z fighters (Roshi blew up the moon, and Yamcha by then out-powers him). Planet-level and above (Saiyan saga Vegeta onward, Frieza, Gurren Lagann) would be a third, cosmic division.
+
 ## How the code is shaped
 
 - `sim/engine.py`: dice, the `Combatant` base class, `attack()` and `Fight`. Anything one fighter does to another's attack, save or turn is a hook on `Combatant` (listed at the top of the file): `incoming_attack`, `immune`/`ignore_imm`, `answer_standoff`, `retaliate` and the rest. Nothing patches the engine from outside.
@@ -61,7 +72,7 @@ The flattening (Nov 2026) changed no results: on 5,564 seeded fights (every 1v1 
 
     cd sheets/build && python build_slayer.py      # writes ../pdf/Doom_Slayer_5e_Build.pdf
 
-Needs `pip install reportlab pypdf` and the DejaVu fonts (`fonts-dejavu` on Debian/Ubuntu). Each build script is self-contained except the Guy, Slayer, Link, Anderson, Spike, V and Kratos ones, which `exec` the shared fonts, styles and helpers in `sheet_style.py`. Without the DejaVu fonts (Windows) it falls back to Calibri and Georgia, which is how `V_5e_Build.pdf` and `Kratos_5e_Build.pdf` were built.
+Needs `pip install reportlab pypdf` and the DejaVu fonts (`fonts-dejavu` on Debian/Ubuntu). Each build script is self-contained except the Guy, Slayer, Link, Anderson, Spike, V, Kratos and Madara ones, which `exec` the shared fonts, styles and helpers in `sheet_style.py`. Without the DejaVu fonts (Windows) it falls back to Calibri and Georgia, which is how `V_5e_Build.pdf` and `Kratos_5e_Build.pdf` were built.
 
 ## Tests
 

@@ -145,7 +145,7 @@ class Itachi(Combatant):
 
     def cast_on(self, fight, tgt):
         tgt.on_targeted_by_spell(fight, self)
-        return self.alive()
+        return self.alive() and not tgt.negates_spells()
 
     # ---------- the turn ----------
     def keep_books(self, fight):
@@ -190,6 +190,8 @@ class Itachi(Combatant):
             # Amaterasu for the one who cannot be reached; otherwise the Sword of Totsuka or the Magatama
             big = [e for e in cands if not e.burning and e.maxhp >= 250]
             if big and self.slots[6] and self.mangekyo_ok(): return "amaterasu", max(big, key=lambda e: e.danger)
+            seal = [e for e in enemies if e.sealable()]        # the Totsuka is what ends an Edo body
+            if seal: return "totsuka", seal[0]
             return ("totsuka" if p_fail(main, "Wis") >= 0.25 else "magatama"), main
         if free:
             if self.slots[5] and main.humanoid and not main.charm_immune and p_fail(main, "Wis", adv=True) >= 0.35:
@@ -267,7 +269,7 @@ class Itachi(Combatant):
         elif act == "totsuka":
             def dmg(crit): return roll(12 if crit else 6, 8)
             def extra(crit, dealt, t=tgt):
-                if dealt and not t.out and not t.save("Wis", DC, spell=True): t.out = True; fight.note(f"Totsuka seals {t.name}")
+                if dealt and not t.out and not t.save("Wis", DC, spell=True): t.seal(fight); fight.note(f"Totsuka seals {t.name}")
             attack(fight, self, tgt, self.atk(), dmg, "force", melee=False, extra=extra)
         elif act == "magatama":
             attack(fight, self, tgt, self.atk(), lambda c: roll(16 if c else 8, 8), "force", melee=False)

@@ -132,3 +132,19 @@ def test_kratos_can_finish_a_downed_anderson_the_way_his_sheet_allows():
         k.tear_heart(f, a)
         if a.out: break
     assert a.out
+
+
+def test_madara_phase_one_cant_be_killed_only_sealed():
+    m = make("madara"); f = Fight([[m], [make("itachi")]])
+    m.take(5000, "force", "test")
+    assert m.phase == 2 and m.alive() and m.hp == 900
+    m2 = make("madara"); Fight([[m2], [make("itachi")]]); m2.seal(f)
+    assert m2.sealed and not m2.alive()
+
+
+def test_the_jinchuriki_ignores_small_hits_spells_and_instant_kills():
+    m = make("madara"); Fight([[m], [make("guy")]]); m.phase_two()
+    assert m.take(99, "bludgeoning", "test") == 0 and m.take(150, "force", "Night Guy") == 150
+    assert m.save("Wis", 30, spell=True) and m.negates_spells()
+    m.out = True
+    assert m.alive()

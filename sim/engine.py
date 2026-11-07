@@ -19,6 +19,12 @@ Hooks a fighter can override (all default to doing nothing):
   on_missed         react when an attack misses you (Talion's Riposte; queue it with fight.after_turn)
   counter_spell     react when an enemy casts a spell: return True to stop it (Itachi's Counterspell)
   on_enemy_speeds_up  react when an enemy switches on a Sandevistan or Haste (Smasher's Counter-Sandevistan)
+  legendary_action  a raid boss's move at the end of someone else's turn (legendary_actions per round)
+  negates_spells    True when spells and quickhacks simply don't take (Madara's Truth-Seeking Balls)
+  seal              what a sealing technique does to you (Itachi's Totsuka): by default you're out
+
+Raid bosses (raid_boss = True) are built to fight a party: Legendary Resistance (turn a failed save into a
+success, legendary_resist a day), Legendary Actions, and usually a second phase. They stay off the ladder.
 
 Conditions the engine handles for everyone: paralyzed/stunned (stun_until), asleep, charmed (Dominate
 Person breaks on a save when hurt, Hypnotic Pattern on any damage; a dominated creature turns on its own
@@ -69,6 +75,8 @@ class Combatant:
     susanoo = False                 # Itachi's ribcage is up: no prone, no topple
     humanoid = True                 # Hold Person and Dominate Person need it
     summon = False                  # a clone or a conjured creature: see Fight.over()
+    raid_boss = False
+    legendary_actions = 0           # per round, refreshed at the start of its turn
 
     def __init__(self):
         self.out = False; self.team = None; self.acted = False
@@ -81,6 +89,7 @@ class Combatant:
         self.charmed = None; self.fear_dc = 0; self.invisible = False; self.sapped = False; self.marked_by = None
         self.owner = None; self.fight = None; self.dread = False; self.sliver = False; self.effects = []
         self.ambushed = False      # disadvantage on the next save (a hack out of hiding)
+        self.legendary_resist = 0; self.la_left = 0
 
     def alive(self): return not self.out and (self.owner is None or self.owner.alive())
     def incapacitated(self): return self.paralyzed or self.asleep or self.charmed is not None
@@ -101,7 +110,10 @@ class Combatant:
         if not ok and self.indomitable > 0:
             self.indomitable -= 1
             ok = d20(adv=adv) + self.saves[ab] + self.indom_bonus >= dc
+        if not ok and self.legendary_resist > 0 and self.spend_legendary_resistance(ab, dc, spell, kind):
+            self.legendary_resist -= 1; ok = True
         return ok
+    def spend_legendary_resistance(self, ab, dc, spell, kind): return True
     def save_adv(self, ab, spell): return False
     def shrug_off_save(self, ab, spell): return False
 
@@ -113,6 +125,7 @@ class Combatant:
         if dmg <= 0: return 0
         a = min(self.thp, dmg); self.thp -= a
         self.hp -= dmg - a
+        if self.asleep: self.asleep = False          # being hurt wakes you
         self.after_damage(dmg, dtype, src, melee)
         if self.charmed is not None:
             # Hypnotic Pattern breaks on any damage; Dominate Person gets a new save
@@ -143,6 +156,10 @@ class Combatant:
     def on_missed(self, fight, attacker, melee): pass
     def counter_spell(self, fight, caster, level): return False
     def on_enemy_speeds_up(self, fight, who): pass
+    def legendary_action(self, fight): pass
+    def negates_spells(self): return False
+    def seal(self, fight): self.out = True
+    def sealable(self): return False             # only a seal ends it (an Edo Tensei body)
 
     # ---------- your own attacks ----------
     def attack_advantage(self, target): return False
@@ -155,7 +172,7 @@ class Combatant:
     def answer_standoff(self, fight, jin): pass
     def retaliate(self, fight, attacker): pass
     def start_turn(self):
-        self.reaction = True; self.disadv_attacks = False; self.sa_used = False
+        self.reaction = True; self.disadv_attacks = False; self.sa_used = False; self.la_left = self.legendary_actions
         if self.prone: self.prone = False
         if self.burning: amaterasu(self, roll(4, 10))
     def turn(self, fight): pass
@@ -263,11 +280,15 @@ class Fight:
                     if ch and ch["mode"] == "dominate" and not (c.paralyzed or c.asleep) and self.allies(c):
                         home = c.team; c.team = ch["by"].team      # commanded against its own side
                         c.turn(self); c.team = home
-                    c.end_turn(self); continue
-                c.turn(self)
-                c.end_turn(self)
-                for fn in self.pending: fn()
-                self.pending = []
+                    c.end_turn(self)
+                else:
+                    c.turn(self)
+                    c.end_turn(self)
+                    for fn in self.pending: fn()
+                    self.pending = []
+                for b in self.all:          # legendary actions come at the end of someone else's turn
+                    if b is not c and b.la_left > 0 and b.alive() and not b.incapacitated() and not self.over():
+                        b.legendary_action(self)
                 for g in self.all:
                     if g.retaliates and g.alive() and g.last_hit_by_melee is c and c.alive() and g is not c:
                         g.retaliate(self, c); g.last_hit_by_melee = None

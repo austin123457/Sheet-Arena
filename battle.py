@@ -6,6 +6,8 @@
   python battle.py ffa slayer link guy smasher     free-for-all
   python battle.py matrix -n 200                   every 1v1, win% grid
   python battle.py solo link -n 100                one fighter vs everyone else at once
+  python battle.py raid madara                     a raid boss vs the whole ladder at once
+  python battle.py raid madara guy+itachi+slayer   a raid boss vs a party
   python battle.py list                            the roster
 
 Dice come from the OS (secrets); nothing is seeded. Fights cap at 40 rounds (a draw)."""
@@ -13,6 +15,7 @@ import argparse
 from sim.engine import ROUND_CAP
 from sim.roster import make, NAMES, Fight, Counter
 
+RAID = ["madara"]          # raid bosses: off the ladder, built to fight a party
 ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs", "talion", "v", "kratos"]
 
 def run(teams, n):
@@ -25,12 +28,13 @@ def run(teams, n):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=["1v1", "team", "ffa", "matrix", "solo", "list"])
+    ap.add_argument("mode", choices=["1v1", "team", "ffa", "matrix", "solo", "raid", "list"])
     ap.add_argument("fighters", nargs="*")
     ap.add_argument("-n", type=int, default=300, help="fights per matchup")
     a = ap.parse_args()
     if a.mode == "list":
         for k in ROSTER: print(f"{k:10s} -> {NAMES[k]}")
+        for k in RAID: print(f"{k:10s} -> {NAMES[k]}  (raid boss)")
         return
     if a.mode == "1v1":
         A, B = a.fighters[:2]; w, dr, r = run([[A], [B]], a.n)
@@ -46,6 +50,11 @@ def main():
     elif a.mode == "solo":
         A = a.fighters[0]; others = [x for x in ROSTER if x != A]; w, dr, r = run([[A], others], a.n)
         print(f"{A} alone vs {len(others)}: {100*w[0]/a.n:.1f}%  avg {r:.1f} rounds")
+    elif a.mode == "raid":
+        boss = a.fighters[0]; party = a.fighters[1].split("+") if len(a.fighters) > 1 else ROSTER
+        w, dr, r = run([[boss], party], a.n)
+        print(f"{boss} vs {'+'.join(party) if len(party) < len(ROSTER) else 'the whole ladder'}: "
+              f"{boss} {100*w[0]/a.n:.1f}%  party {100*w[1]/a.n:.1f}%  draws {100*dr/a.n:.0f}%  avg {r:.1f} rounds")
     elif a.mode == "matrix":
         names = a.fighters or ROSTER
         print("row beats column (%)"); print(" " * 10 + " ".join(f"{x[:6]:>6s}" for x in names))

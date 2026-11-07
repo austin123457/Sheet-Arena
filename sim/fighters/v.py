@@ -112,7 +112,7 @@ class V(Combatant):
         if self.ram < cost or not tgt.alive(): return False
         self.ram -= cost
         tgt.on_targeted_by_spell(fight, self)        # Smasher's ICE hacks back
-        if not self.alive() or not tgt.alive(): return True
+        if not self.alive() or not tgt.alive() or tgt.negates_spells(): return True
         if self.invisible: tgt.ambushed = True       # Magical Ambush
         if which == "short":
             dmg = roll(6, 10) + (roll(2, 10) if tgt.name == "Smasher" else 0)       # extra against a full-body borg
