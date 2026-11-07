@@ -9,12 +9,15 @@ half), the pollen of the Advent of a World of Flowering Trees once (Con 24 or as
 Susanoo below half HP (AC 25; its sword cuts a line through up to four enemies for 12d10, Dex 24 half).
 Legendary Actions: a gunbai strike (1); the Wood Dragon (2): Str 24 or held, 4d10 drained into him.
 
-Phase 2, revived as the Ten-Tails jinchuriki (ch 663-677): 900 HP, AC 24, regrows 30 HP a turn, flies. Six Paths
+Phase 2, revived as the Ten-Tails jinchuriki (ch 663-677), at raid scale (moon-level, like Raditz-saga Piccolo):
+900 HP, AC 24, regrows 30 HP a turn, flies. Six Paths
 Senjutsu: spells and quickhacks don't take, spell saves always succeed, nothing kills him outright (the
-Crucible, an Execution), and any single hit under 100 damage does nothing (the Seventh Gate punch did nothing and
-Daytime Tiger only pushed him back; Night Guy took half his body). Truth-Seeking Balls (+18,
-4d10+9 force, three a turn, cancelling resistance and Nayru's Love alike), Chibaku Tensei (recharge 5-6: 18d10
-to everyone, Dex 25 half, and held), Limbo's shadows as his Legendary Actions (+18, 3d10+9, unseen). At the start
+Crucible, an Execution), and any single hit under 100 damage from below the raid tier does nothing (the Seventh
+Gate punch did nothing and Daytime Tiger only pushed him back; Night Guy took half his body). Truth-Seeking Balls
+(+18, 10d10+15 force, three a turn, cancelling resistance and Nayru's Love alike), Chibaku Tensei (recharge 5-6:
+30d10 to everyone, Dex 25 half, and held), Limbo's shadows as his Legendary Actions (+18, 6d10+10, unseen). The
+first energy blast at him each round is eaten by a Truth-Seeking Ball (in Phase 1 the Preta Path drinks it and
+heals him 30). At the start
 of his fourth Phase 2 turn the moon rises: the Infinite Tsukuyomi takes everyone who isn't under a Rinnegan
 or Susanoo's cover. Itachi's Susanoo shelters him and two others, the way Sasuke's sheltered Team 7.
 """
@@ -23,7 +26,7 @@ from ..engine import Combatant, attack, d, d20, roll
 
 class Madara(Combatant):
     name = "Madara"; danger = 10; caster = True
-    raid_boss = True; legendary_actions = 3
+    raid_boss = True; legendary_actions = 3; tier = 2
 
     def __init__(self):
         super().__init__()
@@ -32,7 +35,7 @@ class Madara(Combatant):
         self.saves = dict(Str=5, Dex=14, Con=15, Int=14, Wis=14, Cha=6)
         self.legendary_resist = 3
         self.meteors = 2; self.meteor_cast = False; self.flame = True; self.pollen = True; self.perfect = False
-        self.chibaku = True; self.p2_turns = 0
+        self.chibaku = True; self.p2_turns = 0; self.dreamed = False
 
     # the Edo body can't be put down for good; Phase 2 starts instead
     @property
@@ -67,8 +70,19 @@ class Madara(Combatant):
     def sealable(self): return self.phase == 1
 
     def modify_incoming(self, dmg, dtype, src, from_attack, melee, ignore_res):
-        if self.phase == 2 and dmg < 100: return 0                      # the threshold
+        if self.phase == 2 and dmg < 100 and self.fight and self.fight.tier_of(src) < 2:
+            return 0                       # the threshold: nothing below the raid tier gets through
         return dmg
+
+    def defend_ac(self, att, total, melee, crit):
+        # the first energy blast at him each round: the Preta Path drinks it, or a Truth-Seeking Ball eats it
+        if not melee and self.reaction and getattr(att, "energy", False):
+            self.reaction = False
+            if self.phase == 1: self.hp = min(self.maxhp, self.hp + 30)
+            return None
+        return 0
+
+    def needs_moon(self): return self.phase == 2
 
     def on_zero(self, src, crit):
         if self.phase == 1 and not self.sealed: self.phase_two(); return
@@ -86,7 +100,7 @@ class Madara(Combatant):
         if self.phase == 1:
             attack(fight, self, tgt, 16, lambda c: roll(6 if c else 3, 10) + 9, "bludgeoning", True)
         else:
-            attack(fight, self, tgt, 18, lambda c: roll((6 if c else 3) if lim else (8 if c else 4), 10) + 9,
+            attack(fight, self, tgt, 18, lambda c: (roll(12 if c else 6, 10) + 10) if lim else (roll(20 if c else 10, 10) + 15),
                    "bludgeoning" if lim else "force", not lim, adv=lim, ignore_res=True, ignore_imm=True)
 
     def held(self, e):
@@ -125,11 +139,11 @@ class Madara(Combatant):
         # Phase 2
         self.p2_turns += 1
         self.hp = min(self.maxhp, self.hp + 30)
-        if self.p2_turns == 4:
-            self.infinite_tsukuyomi(fight); return
+        if self.p2_turns >= 4 and fight.moon and not self.dreamed:
+            self.dreamed = True; self.infinite_tsukuyomi(fight); return
         if not self.chibaku and d(6) >= 5: self.chibaku = True
         if self.chibaku and len(enemies) >= 2:
-            self.chibaku = False; self.everyone(fight, 18, 25, "bludgeoning", rider=self.held); return
+            self.chibaku = False; self.everyone(fight, 30, 25, "bludgeoning", rider=self.held); return
         for i in range(3):
             tgt = fight.pick_target(self)
             if not tgt: return

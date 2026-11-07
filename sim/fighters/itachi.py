@@ -132,7 +132,7 @@ class Itachi(Combatant):
         return dmg // 2 if self.susanoo else dmg
 
     def after_damage(self, dmg, dtype, src, melee):
-        if self.conc and d20(adv=True) + self.saves["Con"] < max(10, dmg // 2): self.drop_conc()
+        if self.conc and d20(adv=True) + self.saves["Con"] < min(30, max(10, dmg // 2)): self.drop_conc()
 
     def counter_spell(self, fight, caster, level):
         if level >= 3 and self.reaction and self.slots[3] > 0 and self.alive() and not self.incapacitated():

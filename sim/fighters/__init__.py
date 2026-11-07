@@ -17,5 +17,6 @@ from .talion import Talion
 from .v import V
 from .kratos import Kratos
 from .madara import Madara
+from .piccolo import Piccolo
 
-ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Madara]
+ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Madara, Piccolo]

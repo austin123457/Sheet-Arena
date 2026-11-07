@@ -15,7 +15,7 @@ import argparse
 from sim.engine import ROUND_CAP
 from sim.roster import make, NAMES, Fight, Counter
 
-RAID = ["madara"]          # raid bosses: off the ladder, built to fight a party
+RAID = ["madara", "piccolo"]          # raid bosses: off the ladder, built to fight a party
 ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs", "talion", "v", "kratos"]
 
 def run(teams, n):

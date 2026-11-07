@@ -76,6 +76,7 @@ class Combatant:
     humanoid = True                 # Hold Person and Dominate Person need it
     summon = False                  # a clone or a conjured creature: see Fight.over()
     raid_boss = False
+    tier = 1                        # 1 the ladder, 2 the raid tier (up to the moon); see Fight.tier_of
     legendary_actions = 0           # per round, refreshed at the start of its turn
 
     def __init__(self):
@@ -160,6 +161,7 @@ class Combatant:
     def negates_spells(self): return False
     def seal(self, fight): self.out = True
     def sealable(self): return False             # only a seal ends it (an Edo Tensei body)
+    def needs_moon(self): return False           # a win condition that dies with the moon
 
     # ---------- your own attacks ----------
     def attack_advantage(self, target): return False
@@ -238,6 +240,12 @@ class Fight:
         for i, t in enumerate(teams):
             for c in t: c.team = i; c.acted = False; c.fight = self
         self.round = 0; self.notes = []; self.verbose = verbose; self.pending = []
+        self.moon = True            # the Infinite Tsukuyomi needs it; Piccolo has blown one up before
+    def tier_of(self, src):
+        """The tier of whoever a damage source belongs to; a technique's name (Night Guy, BFG) counts as the ladder."""
+        for c in self.all:
+            if c.name == src: return c.tier
+        return 1
     def add(self, c, team):
         """Bring a summon into the fight on a team; it acts on its owner's turn, not in initiative."""
         c.team = team; c.fight = self; c.acted = True; self.all.append(c)

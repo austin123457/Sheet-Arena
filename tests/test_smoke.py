@@ -148,3 +148,16 @@ def test_the_jinchuriki_ignores_small_hits_spells_and_instant_kills():
     assert m.save("Wis", 30, spell=True) and m.negates_spells()
     m.out = True
     assert m.alive()
+
+
+def test_piccolo_blows_up_the_moon_madara_needs():
+    p, m = make("piccolo"), make("madara")
+    f = Fight([[p], [m]]); m.phase_two(); p.weights = False
+    p.turn(f)
+    assert not f.moon
+
+
+def test_raid_toughness_only_stops_the_ladder():
+    p, m, g = make("piccolo"), make("madara"), make("guts")
+    Fight([[p], [m, g]])
+    assert p.take(90, "slashing", "Guts") == 0 and p.take(90, "force", "Madara") == 90

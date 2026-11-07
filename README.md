@@ -55,6 +55,9 @@ Above the ladder sits the raid tier: everything from past the god-killers up to 
 
 - **Madara Uchiha** (`Madara_Uchiha_Raid.pdf`), CR 30 in two phases. Phase 1 is the Edo Tensei body: 700 HP regrowing 50 a turn, never killed by damage (at 0 it's pinned and Phase 2 starts), ended only by a seal: Itachi's Totsuka, through three Legendary Resistances. Phase 2 is the Ten-Tails jinchūriki: 900 HP, spells don't take, nothing under 100 damage in one hit does anything (Night Guy does), no instant kills, and on his fourth turn the Infinite Tsukuyomi takes everyone not under a Susanoo.
 - Against the whole ladder he wins every time: the party burns Phase 1 too fast for the seal and can't finish Phase 2 before the moon. Slow parties stall into forty-round draws, and Itachi's seal lands about once in a hundred. Ten-Tails Madara fought on even terms with Six Paths Naruto, who tanks a moon-splitting beam in *The Last*, so the ladder isn't the tier that beats him.
+- **Piccolo, Raditz saga** (`Piccolo_Raditz_Saga_Raid.pdf`), CR 30. He destroyed the moon in chapter 208, which is what puts him in the tier. 1000 HP, raid toughness, regeneration, ki blasts and the mouth blast, and the Special Beam Cannon: a turn to charge under concentration, then 60d10 through resistance, immunity and thresholds alike. He'll blow up the moon if an enemy needs it. He wins every ladder one-on-one; the whole ladder beats him about half the time and draws the rest.
+- **Piccolo vs Madara:** Madara wins all of 1,000. Piccolo kills the moon (and the Infinite Tsukuyomi) in about two of three, and one critical beam erased Madara's whole first phase, but Limbo breaks every charge after the first and Madara has two lives. In the manga the beam only landed because Goku held Raditz still.
+- Raid-tier bodies ignore any single ladder hit under 100 (Madara's second phase, Piccolo); raid-against-raid hits land normally.
 - The raid tier is sized to the moon: next up are the Raditz-saga Z fighters (Roshi blew up the moon, and Yamcha by then out-powers him). Planet-level and above (Saiyan saga Vegeta onward, Frieza, Gurren Lagann) would be a third, cosmic division.
 
 ## How the code is shaped
@@ -72,7 +75,7 @@ The flattening (Nov 2026) changed no results: on 5,564 seeded fights (every 1v1 
 
     cd sheets/build && python build_slayer.py      # writes ../pdf/Doom_Slayer_5e_Build.pdf
 
-Needs `pip install reportlab pypdf` and the DejaVu fonts (`fonts-dejavu` on Debian/Ubuntu). Each build script is self-contained except the Guy, Slayer, Link, Anderson, Spike, V, Kratos and Madara ones, which `exec` the shared fonts, styles and helpers in `sheet_style.py`. Without the DejaVu fonts (Windows) it falls back to Calibri and Georgia, which is how `V_5e_Build.pdf` and `Kratos_5e_Build.pdf` were built.
+Needs `pip install reportlab pypdf` and the DejaVu fonts (`fonts-dejavu` on Debian/Ubuntu). Each build script is self-contained except the Guy, Slayer, Link, Anderson, Spike, V, Kratos, Madara and Piccolo ones, which `exec` the shared fonts, styles and helpers in `sheet_style.py`. Without the DejaVu fonts (Windows) it falls back to Calibri and Georgia, which is how `V_5e_Build.pdf` and `Kratos_5e_Build.pdf` were built.
 
 ## Tests
 
