@@ -58,18 +58,18 @@ class Itachi(Combatant):
                 self.hp -= 5
                 if self.hp <= 0: self.hp = 0; self.out = True; return
         if not enemies: return
-        # NOTE: nothing increments hits_on, so Izanami never fires.
-        ready = [e for e in enemies if self.hits_on[e.name] >= 2]
+        # Izanami: a loop of sensation, so it needs someone who has struck him on two separate turns
+        ready = [e for e in enemies if self.turns_struck_by(e) >= 2]
         tgt = None; act = None
         if ready and self.izanami:
             tgt = max(ready, key=lambda e: e.danger); act = "izanami"
         elif len(enemies) >= 2 and self.fireball > 0 and sum(1 for e in enemies if e.melee) >= 2:
             act = "fireball"
-        elif not self.susanoo_cast and not (len(enemies) == 1 and enemies[0].name == "Crane"):
+        elif not self.susanoo_cast:
             act = "susanoo"
         else:
-            # Smasher's Mage Slayer and Indomitable eat a spell; the first Guy never meets his eyes
-            cands = [e for e in enemies if not (e.name == "Smasher" and (e.mage_slayer or e.indomitable > 0)) and not (e.name == "Guy")]
+            # Smasher's Mage Slayer and Indomitable eat a spell
+            cands = [e for e in enemies if not (e.name == "Smasher" and (e.mage_slayer or e.indomitable > 0))]
             tgt = max(cands, key=lambda e: e.danger) if cands else max(enemies, key=lambda e: e.danger)
             if self.tsukuyomi: act = "tsukuyomi"
             elif self.susanoo: act = "totsuka"
@@ -87,10 +87,8 @@ class Itachi(Combatant):
                 if e.melee or len(enemies) == 1:
                     self.cast_on(fight, e)
                     if self.out: return
-                    dmg = roll(8, 6, minv=2)
-                    if e.save("Dex", 19, spell=True):
-                        dmg = 0 if e.evasion else dmg // 2
-                    e.take(dmg, "fire", "Fireball")
+                    dmg = e.dex_damage(e.save("Dex", 19, spell=True), roll(8, 6, minv=2))
+                    if dmg: e.take(dmg, "fire", "Fireball")
         elif act == "susanoo":
             self.susanoo = True; self.susanoo_cast = True; self.thp = 150; self.yata = 3; self.sus_turns = 1
         elif act == "tsukuyomi":

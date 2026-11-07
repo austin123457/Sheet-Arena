@@ -8,8 +8,8 @@ MAKERS = {cls.name: cls for cls in ALL}
 DANGER = {cls.name: cls.danger for cls in ALL}
 
 NAMES = {
-    "gs": "GS", "goblin-slayer": "GS", "guts": "Guts", "crane": "Crane2", "crane-old": "Crane", "itachi": "Itachi",
-    "smasher": "Smasher", "jin": "Jin", "guy": "GuyC", "guy-mine": "Guy", "guy-caleb": "Guy2",
+    "gs": "GS", "goblin-slayer": "GS", "guts": "Guts", "crane": "Crane", "itachi": "Itachi",
+    "smasher": "Smasher", "jin": "Jin", "guy": "Guy", "might-guy": "Guy",
     "slayer": "Slayer", "doomslayer": "Slayer", "link": "Link", "hero-of-time": "Link", "beast": "Beast",
     "battle-beast": "Beast", "anderson": "Anderson", "arthur": "Arthur", "spike": "Spike",
 }

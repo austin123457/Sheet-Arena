@@ -64,10 +64,10 @@ class Smasher(Combatant):
                 for e in enemies[:4]:
                     if e.out: continue
                     f = roll(4, 6); b = roll(4, 6)
-                    if e.save("Dex", 19):
-                        if e.evasion: continue
-                        f //= 2; b //= 2
-                    e.take(f, "fire", "Missiles"); e.take(b, "bludgeoning", "Missiles", ignore_res=True)
+                    saved = e.save("Dex", 19)
+                    f = e.dex_damage(saved, f); b = e.dex_damage(saved, b)
+                    if f: e.take(f, "fire", "Missiles")
+                    if b: e.take(b, "bludgeoning", "Missiles", ignore_res=True)
                 continue
             first = False
             for i in range(4):

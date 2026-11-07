@@ -6,6 +6,7 @@ from ..engine import Combatant, attack, d, d20, roll
 
 class Spike(Combatant):
     name = "Spike"; danger = 3; melee = True
+    evasion = True
 
     def __init__(self):
         super().__init__()

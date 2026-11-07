@@ -64,7 +64,7 @@ class BattleBeast(Combatant):
         if not self.raging:
             self.raging = True; self.reckless = True; bonus = True
             self.worthy = max(fight.enemies(self), key=lambda e: e.danger)
-        elif self.presence and not tgt.fright_immune and tgt.name not in ("Guts", "Smasher", "Link", "Slayer", "GuyC"):
+        elif self.presence and not tgt.fright_immune and tgt.name not in ("Guts", "Smasher", "Link", "Slayer", "Guy"):
             self.presence = False; bonus = True
             if not tgt.save("Wis", 22): tgt.frightened = True
         if self.worthy is not None and not self.worthy.out: tgt = self.worthy

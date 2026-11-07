@@ -1,4 +1,4 @@
-exec(open('build_guy.py').read().split("doc = SimpleDocTemplate")[0])  # reuse fonts, styles, helpers
+exec(open('sheet_style.py').read())  # reuse fonts, styles, helpers
 doc = SimpleDocTemplate("../pdf/Might_Guy_Canon_5e_Build.pdf", pagesize=letter, leftMargin=0.6*inch, rightMargin=0.6*inch, topMargin=0.6*inch, bottomMargin=0.7*inch, title="Might Guy (Canon) — D&D 5e Build", author="Claude")
 W = letter[0] - 1.2*inch
 S = []

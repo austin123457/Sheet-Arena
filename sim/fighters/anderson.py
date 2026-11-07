@@ -28,15 +28,18 @@ class Anderson(Combatant):
 
     def on_zero(self, src, crit):
         self.times_down += 1
-        # NOTE: take() has already set hp to 0, so this "one blow for his whole pool" check never fires
-        if self.hp <= -self.maxhp: self.out = True; return
         self.hp = 0; self.down = True
 
     def take(self, dmg, dtype, src, **kw):
-        if self.down and not self.nail:     # nothing more happens to a body that's already down
+        # Only three things kill him: a single blow for his full hit points, his heart torn out (nobody here
+        # grapples), or the Nail. While the Nail is in him, only breaking it does.
+        if self.down and not self.nail:     # a body that's already down only notices a blow that big
             self.down_dmg += dmg
+            if dtype in ("radiant", "fire"): self.radiant_taken += dmg      # still keeps him from regrowing
+            if dmg >= self.maxhp: self.out = True
             return dmg
         r = super().take(dmg, dtype, src, **kw)
+        if not self.nail and r >= self.maxhp: self.out = True
         if self.down and self.nail and self.down_dmg >= 40: self.out = True; self.nail_broken = True
         return r
 

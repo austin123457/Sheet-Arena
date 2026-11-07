@@ -74,11 +74,8 @@ class Slayer(Combatant):
                 self.bfg -= 1
                 for e in list(enemies):
                     if e.out: continue
-                    dmg = roll(20, 10)
-                    if e.save("Dex", 18):
-                        if e.evasion or e.monk_evasion: continue
-                        dmg //= 2
-                    e.take(dmg, "force", "BFG")
+                    dmg = e.dex_damage(e.save("Dex", 18), roll(20, 10))
+                    if dmg: e.take(dmg, "force", "BFG")
             elif self.crucible > 0 and cur <= 240:
                 self.crucible -= 1
                 frozen = tgt.paralyzed

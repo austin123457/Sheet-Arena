@@ -18,7 +18,6 @@ Hooks a fighter can override (all default to doing nothing):
   retaliate         swing back after a melee hit (set retaliates = True)
 """
 import secrets
-from collections import Counter
 
 ROUND_CAP = 40
 MENTAL = ("Int", "Wis", "Cha")
@@ -53,8 +52,7 @@ class Combatant:
     fright_immune = False
     never_stunned = False           # Guts (and the Beast): no stun or paralysis that checks this lands
     shrugs_stunning_strike = False  # Smasher: a monk's Stunning Strike doesn't land
-    evasion = False                 # nothing on a made Dex save
-    monk_evasion = False            # the Guys' Evasion; only the BFG honours it so far
+    evasion = False                 # Dex-save-for-half: nothing on a success, half on a failure (see dex_damage)
     averts_eyes = False             # Itachi doesn't bother with Tsukuyomi
     retaliates = False              # Fight.run calls retaliate() after an enemy's turn that hit you in melee
     susanoo = False                 # Itachi's ribcage is up: no prone, no topple
@@ -64,7 +62,7 @@ class Combatant:
         self.thp = 0; self.prone = False; self.paralyzed = False; self.poisoned = False; self.frightened = False
         self.asleep = False; self.burning = False; self.stun_immune = False; self.stun_until = None
         self.reckless = False; self.reaction = True; self.disadv_attacks = False; self.sa_used = False
-        self.hits_on = Counter(); self.indomitable = 0; self.indom_bonus = 0
+        self.struck_on = {}; self.indomitable = 0; self.indom_bonus = 0
         self.last_hit_by_melee = None; self.adjacent = set(); self.trip_done = False
         self.surge_used = False; self.down = False; self.death_fail = 0
 
@@ -101,6 +99,16 @@ class Combatant:
     def modify_incoming(self, dmg, dtype, src, from_attack, melee, ignore_res): return dmg
     def after_damage(self, dmg, dtype, src, melee): pass
     def on_zero(self, src, crit): self.out = True
+
+    def dex_damage(self, saved, dmg):
+        """Damage from a Dex-save-for-half effect, after the save. Evasion: nothing on a success and half on a
+        failure, unless he's incapacitated."""
+        if self.evasion and not (self.paralyzed or self.asleep): return 0 if saved else dmg // 2
+        return dmg // 2 if saved else dmg
+
+    def turns_struck_by(self, attacker):
+        """How many separate rounds this attacker has hit you in."""
+        return len(self.struck_on.get(attacker, ()))
 
     # ---------- attacks against you ----------
     def incoming_attack(self, attacker, bonus, adv, dis): return adv, dis
@@ -148,6 +156,7 @@ def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=Fal
     if not hit:
         att.on_miss(fight, tgt, total, ac, melee)
         return (False, False, 0)
+    tgt.struck_on.setdefault(att, set()).add(fight.round)
     dmg = dmg_fn(crit)
     if sneak and not att.sa_used and ((adv and not dis) or any(a.alive() and a is not att and a.melee for a in fight.allies(att))):
         dmg += roll(sneak * (2 if crit else 1), 6); att.sa_used = True
