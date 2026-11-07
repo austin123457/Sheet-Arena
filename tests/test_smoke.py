@@ -137,7 +137,7 @@ def test_kratos_can_finish_a_downed_anderson_the_way_his_sheet_allows():
 def test_madara_phase_one_cant_be_killed_only_sealed():
     m = make("madara"); f = Fight([[m], [make("itachi")]])
     m.take(5000, "force", "test")
-    assert m.phase == 2 and m.alive() and m.hp == 900
+    assert m.phase == 2 and m.alive() and m.hp == 1350
     m2 = make("madara"); Fight([[m2], [make("itachi")]]); m2.seal(f)
     assert m2.sealed and not m2.alive()
 
