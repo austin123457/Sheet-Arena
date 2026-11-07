@@ -1,0 +1,9 @@
+[project]
+name = "sheet-arena"
+version = "0.1.0"
+description = "D&D 5e (2024) stat sheets for fictional characters, and a dice-driven arena that fights them."
+requires-python = ">=3.10"
+dependencies = []
+[project.optional-dependencies]
+sheets = ["reportlab", "pypdf"]
+test = ["pytest"]
