@@ -93,4 +93,17 @@ def test_mangekyo_costs_exhaustion():
 def test_talion_loses_might_when_hit():
     t = make("talion"); t.might = 5
     t.take(10, "slashing", "test", from_attack=True)
-    assert t.might == 3
+    assert t.might == 4
+
+
+def test_freeflow_counter_turns_a_melee_hit_into_a_miss_but_not_a_crit():
+    t, g = make("talion"), make("guts")
+    f = Fight([[t], [g]])
+    assert t.defend_ac(g, 30, True, False) is None and t.might == 1
+    assert t.defend_ac(g, 30, True, True) == 0
+
+
+def test_cranes_perfect_block_only_when_six_more_ac_would_stop_it():
+    c, g = make("crane"), make("guts")
+    assert c.defend_ac(g, 25, True, False) == 0 and c.reaction
+    assert c.defend_ac(g, 18, True, False) == 6 and not c.reaction
