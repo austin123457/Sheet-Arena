@@ -23,6 +23,14 @@ Hooks a fighter can override (all default to doing nothing):
   negates_spells    True when spells and quickhacks simply don't take (Madara's Truth-Seeking Balls)
   seal              what a sealing technique does to you (Itachi's Totsuka): by default you're out
 
+Exponents. Every creature has an exponent (tier): E1 the ladder (city, mountain), E2 the moon, E3 a planet, E4 a
+star, E5 a galaxy, E6 a universe. Its physical stats, HP and damage are written in its own units, so two creatures of
+the same exponent play ordinary 5e. Across exponents, damage converts: x100 per exponent up, /100 per exponent down
+(a 30-point E1 hit on an E2 body is 0.3, which is nothing). A technique can carry its own exponent (Night Guy is an
+E2 attack from an E1 body). The d20 doesn't scale, it gets an edge: one exponent apart, the higher creature has
+advantage on attacks and saves against the lower one and the lower has disadvantage; two or more apart, the higher
+one always hits and always saves, and the lower one can't touch it.
+
 Raid bosses (raid_boss = True) are built to fight a party: Legendary Resistance (turn a failed save into a
 success, legendary_resist a day), Legendary Actions, and usually a second phase. They stay off the ladder.
 
@@ -76,7 +84,7 @@ class Combatant:
     humanoid = True                 # Hold Person and Dominate Person need it
     summon = False                  # a clone or a conjured creature: see Fight.over()
     raid_boss = False
-    tier = 1                        # 1 the ladder, 2 the raid tier (up to the moon); see Fight.tier_of
+    tier = 1                        # the exponent: 1 the ladder, 2 the moon (the raid tier), 3 a planet...
     legendary_actions = 0           # per round, refreshed at the start of its turn
 
     def __init__(self):
@@ -106,6 +114,11 @@ class Combatant:
         pen = 0
         if self.sliver: self.sliver = False; pen = d(4)        # Mind Sliver
         dis = self.ambushed; self.ambushed = False
+        gap = self.tier_gap()
+        if gap >= 2: return True
+        if gap <= -2: return False
+        if gap == 1: adv = True
+        if gap == -1: dis = True
         ok = d20(adv=adv, dis=dis) + self.saves[ab] - pen >= dc
         if not ok and self.shrug_off_save(ab, spell): return True
         if not ok and self.indomitable > 0:
@@ -117,11 +130,18 @@ class Combatant:
     def spend_legendary_resistance(self, ab, dc, spell, kind): return True
     def save_adv(self, ab, spell): return False
     def shrug_off_save(self, ab, spell): return False
+    def tier_gap(self):
+        """My exponent minus that of whoever's acting (the effect I'm saving against is theirs)."""
+        a = self.fight.actor if self.fight else None
+        return 0 if a is None or a is self else self.tier - a.tier
 
     # ---------- damage ----------
-    def take(self, dmg, dtype, src, from_attack=False, melee=False, crit=False, ignore_res=False, ignore_imm=False):
+    def take(self, dmg, dtype, src, from_attack=False, melee=False, crit=False, ignore_res=False, ignore_imm=False, exp=None):
         if self.out: return 0
         if self.immune(dtype) and not ignore_imm: return 0
+        e = exp if exp is not None else (self.fight.tier_of(src) if self.fight else 1)
+        if e != self.tier: dmg = int(dmg * 100 ** (e - self.tier))      # convert to my units
+        if dmg <= 0: return 0
         dmg = self.modify_incoming(dmg, dtype, src, from_attack, melee, ignore_res)
         if dmg <= 0: return 0
         a = min(self.thp, dmg); self.thp -= a
@@ -201,6 +221,10 @@ def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=Fal
     """One attack roll. Returns (hit, crit, damage dealt)."""
     adv, dis = tgt.incoming_attack(att, bonus, adv, dis)
     if tgt.out: return (False, False, 0)
+    gap = att.tier - tgt.tier
+    if gap <= -2: return (False, False, 0)        # two exponents up: it can't be touched
+    if gap == 1: adv = True
+    if gap == -1: dis = True
     if tgt.reckless or tgt.prone or tgt.paralyzed or tgt.asleep: adv = True
     if att.poisoned or att.disadv_attacks or att.prone or att.frightened: dis = True
     if att.attack_advantage(tgt): adv = True
@@ -215,7 +239,7 @@ def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=Fal
     acb = tgt.defend_ac(att, total, melee, crit)
     if acb is None: return (False, False, 0)  # negated
     ac = tgt.ac_now() + acb
-    hit = crit or (nat != 1 and total >= ac)
+    hit = crit or (nat != 1 and total >= ac) or gap >= 2
     if not hit:
         att.on_miss(fight, tgt, total, ac, melee)
         tgt.on_missed(fight, att, melee)
@@ -243,6 +267,7 @@ class Fight:
             for c in t: c.team = i; c.acted = False; c.fight = self
         self.round = 0; self.notes = []; self.verbose = verbose; self.pending = []
         self.moon = True            # the Infinite Tsukuyomi needs it; Piccolo has blown one up before
+        self.actor = None           # whose turn (or legendary action) it is: saves are against them
     def tier_of(self, src):
         """The tier of whoever a damage source belongs to; a technique's name (Night Guy, BFG) counts as the ladder."""
         for c in self.all:
@@ -276,14 +301,15 @@ class Fight:
         return len({c.team for c in self.all if c.alive() and not c.summon}) <= 1
     def run(self):
         order = sorted(self.all, key=lambda c: c.init(), reverse=True)
+        for c in self.all: self.actor = c; c.before_first_round(self)
         if all(c.tier >= 2 for c in self.all):
             for c in self.all: c.legendary_resist = 0      # raid against raid: Legendary Resistance is a party-fight device, not a canon ability
-        for c in self.all: c.before_first_round(self)
         while not self.over() and self.round < ROUND_CAP:
             self.round += 1
             for c in order:
                 if self.over(): break
                 if not c.alive(): continue
+                self.actor = c
                 c.start_turn()
                 c.acted = True
                 for e in self.all: e.trip_done = False
@@ -300,9 +326,9 @@ class Fight:
                     self.pending = []
                 for b in self.all:          # legendary actions come at the end of someone else's turn
                     if b is not c and b.la_left > 0 and b.alive() and not b.incapacitated() and not self.over():
-                        b.legendary_action(self)
+                        self.actor = b; b.legendary_action(self); self.actor = c
                 for g in self.all:
                     if g.retaliates and g.alive() and g.last_hit_by_melee is c and c.alive() and g is not c:
-                        g.retaliate(self, c); g.last_hit_by_melee = None
+                        self.actor = g; g.retaliate(self, c); g.last_hit_by_melee = None; self.actor = c
         alive_teams = {c.team for c in self.all if c.alive() and not c.summon}
         return (next(iter(alive_teams)) if alive_teams else None), self.round

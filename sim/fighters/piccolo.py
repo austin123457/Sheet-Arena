@@ -1,18 +1,16 @@
 """Piccolo (Piccolo Jr.) in the Raditz saga, raid boss. Sheet: Piccolo_Raditz_Saga_Raid.pdf. A moon-level monster:
 months after Raditz, at the same strength, he blows up the moon to stop Gohan's Great Ape (chapter 208).
 
-Raid-tier scores, past 5e's caps the way his feats are: Str 44, Dex 30, Con 44 (+17, +10, +17; proficiency +9):
-the moon on the page, and Raditz's blows taken. 1350 HP (60d10), AC 18 in the weighted cape and turban, 21 once
-they come off (his first bonus action), flies.
-Raid toughness: any single hit under 100 from below the raid tier does nothing. Legendary Resistance (3), three
-Legendary Actions. A barrage of five ki blasts a turn (+26, 10d10+17 force); the mouth blast (recharge 5-6: 30d10
-force through up to three, Dex 34 half);
+Exponent 2 (moon). In moon units: Str 30, Dex 16, Con 30 (the moon on the page, and Raditz's blows taken; his
+mind isn't tiered: Int 16, Wis 20, Cha 12); proficiency +9. 270 HP, AC 11 in the weighted cape and turban, 14 once
+they come off (his first bonus action), flies. Legendary Resistance (3), three Legendary Actions. A barrage of five
+ki blasts a turn (+19, 2d10+3 force); the mouth blast (recharge 5-6: 6d10 force through up to three, Dex 27 half);
 the Special Beam Cannon: one turn charging (he can't attack, and a hit makes him hold his concentration), the
-next turn it fires (+26, 60d10 piercing, crits on 19-20, through resistance, immunity and thresholds alike: it
+next turn it fires (+19, 12d10 piercing, crits on 19-20, through resistance, immunity and thresholds alike: it
 went through Raditz, who outclassed him). He opens a
 release turn with a ki blast as a bonus action, to draw whatever's guarding against it. Namekian regeneration
-(50 HP at the start of each of his turns, and Regrowth: a bonus action, three times, 200 HP back and the limb with it). And the moon: if an enemy needs it, he spends an
-action to blow it up, the way he did for Gohan. Legendary Actions: an eye laser (+26, 6d10 fire).
+(10 HP at the start of each of his turns, and Regrowth: a bonus action, three times, 40 HP back and the limb with it). And the moon: if an enemy needs it, he spends an
+action to blow it up, the way he did for Gohan. Legendary Actions: an eye laser (+19, 1d10+1 fire).
 """
 from ..engine import Combatant, attack, d, d20, roll
 
@@ -23,16 +21,12 @@ class Piccolo(Combatant):
 
     def __init__(self):
         super().__init__()
-        self.hp = self.maxhp = 1350; self.ac = 18
-        self.saves = dict(Str=26, Dex=19, Con=26, Int=3, Wis=14, Cha=1); self.legendary_resist = 3
+        self.hp = self.maxhp = 270; self.ac = 11
+        self.saves = dict(Str=19, Dex=12, Con=19, Int=3, Wis=14, Cha=1); self.legendary_resist = 3
         self.weights = True; self.regen = 3; self.charged = False; self.wave = True; self.energy = False
         self.broken = False         # a charge has been knocked out of him: no more charging into open fire
 
     def init(self): return d(20) + 4
-
-    def modify_incoming(self, dmg, dtype, src, from_attack, melee, ignore_res):
-        if dmg < 100 and self.fight and self.fight.tier_of(src) < 2: return 0     # raid toughness
-        return dmg
 
     def after_damage(self, dmg, dtype, src, melee):
         # holding a charged Special Beam Cannon through a hit (2024: the DC tops out at 30)
@@ -41,17 +35,17 @@ class Piccolo(Combatant):
 
     def blast(self, fight, tgt):
         self.energy = True
-        attack(fight, self, tgt, 26, lambda c: roll(20 if c else 10, 10) + 17, "force", melee=False)
+        attack(fight, self, tgt, 19, lambda c: roll(4 if c else 2, 10) + 3, "force", melee=False)
         self.energy = False
 
     def turn(self, fight):
         tgt = fight.pick_target(self)
         if not tgt: return
-        self.hp = min(self.maxhp, self.hp + 50)                                    # Namekian regeneration
+        self.hp = min(self.maxhp, self.hp + 10)                                    # Namekian regeneration
         bonus = False
-        if self.weights: self.weights = False; self.ac = 21; bonus = True          # the cape and turban come off
+        if self.weights: self.weights = False; self.ac = 14; bonus = True          # the cape and turban come off
         elif self.hp <= self.maxhp // 2 and self.regen > 0:
-            self.regen -= 1; self.hp = min(self.maxhp, self.hp + 200); bonus = True  # Regrowth
+            self.regen -= 1; self.hp = min(self.maxhp, self.hp + 40); bonus = True   # Regrowth
         if not self.wave and d(6) >= 5: self.wave = True
         # the moon goes first if anyone out there needs it
         if fight.moon and any(e.needs_moon() for e in fight.enemies(self)):
@@ -60,17 +54,18 @@ class Piccolo(Combatant):
             if not bonus: self.blast(fight, tgt)                                   # draw the guard off
             if tgt.out: return
             self.charged = False; self.energy = True
-            attack(fight, self, tgt, 26, lambda c: roll(120 if c else 60, 10), "piercing", melee=False,
+            attack(fight, self, tgt, 19, lambda c: roll(24 if c else 12, 10), "piercing", melee=False,
                    crit_range=19, ignore_res=True, ignore_imm=True)
             self.energy = False; fight.note("Special Beam Cannon"); return
         held = tgt.paralyzed or tgt.charmed is not None or tgt.asleep
-        if (tgt.hp + tgt.thp > 150 or tgt.immune("force")) and len(fight.enemies(self)) == 1 and (not self.broken or held):
-            self.charged = True; return                # charge the Makankosappo, unless it won't hold
+        # the Makankosappo is for what his blasts can't handle: immunity, or something a tier above him (Raditz)
+        if (tgt.immune("force") or tgt.tier > self.tier) and len(fight.enemies(self)) == 1 and (not self.broken or held):
+            self.charged = True; return
         if self.wave:
             self.wave = False
             for e in fight.enemies(self)[:3]:
-                saved = e.save("Dex", 34)
-                dmg = e.dex_damage(saved, roll(30, 10))
+                saved = e.save("Dex", 27)
+                dmg = e.dex_damage(saved, roll(6, 10))
                 if dmg: e.take(dmg, "force", self.name)
             return
         for i in range(5):                                                     # a barrage
@@ -84,5 +79,5 @@ class Piccolo(Combatant):
         if not tgt: return
         self.la_left -= 1
         self.energy = True
-        attack(fight, self, tgt, 26, lambda c: roll(12 if c else 6, 10), "fire", melee=False)     # eye laser
+        attack(fight, self, tgt, 19, lambda c: roll(2 if c else 1, 10) + 1, "fire", melee=False)  # eye laser
         self.energy = False

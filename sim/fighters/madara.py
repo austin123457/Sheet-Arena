@@ -1,8 +1,8 @@
 """Madara Uchiha, raid boss. Sheet: Madara_Uchiha_Raid.pdf. Built as a monster in two phases, off the ladder.
 
-Scores: Phase 1 at the top of the ladder (Str 24, Dex 26, Con 26, Int 22, Wis 24, Cha 22); Phase 2 a step past
-Raditz-saga Piccolo where it's his own (Str 40, Dex 40, Con 40, Int 24, Wis 30, Cha 24): Piccolo hits harder and
-takes it better (the moon is his, on the page), Madara is quicker and carries the hax. Proficiency +9 throughout.
+Phase 1 is exponent 1, at the top of the ladder (Str 24, Dex 26, Con 26, Int 22, Wis 24, Cha 22). Phase 2 is
+exponent 2, in moon units (Str 26, Dex 26, Con 26; the mind untiered: Int 24, Wis 30, Cha 24): Piccolo hits harder
+and takes it better (the moon is his, on the page), Madara is quicker and carries the hax. Proficiency +9.
 Sharingan genjutsu in both phases (recharge 5-6, an action): a creature that can see his eyes makes a Wis save
 (DC 24, then 27) or loses its next turn to the illusion. Long-term control (Kurama, Yagura) is set up outside a
 fight; inside one, a gaze buys a moment, and the victim tears out of it. Anyone with averted eyes (Guy) is immune.
@@ -17,13 +17,13 @@ Susanoo below half HP (AC 25; its sword cuts a line through up to four enemies f
 Legendary Actions: a gunbai strike (1); the Wood Dragon (2): Str 24 or held, 4d10 drained into him.
 
 Phase 2, revived as the Ten-Tails jinchuriki (ch 663-677), at raid scale (moon-level by the scaling chain):
-1230 HP (60d10, like every CR 30 raid boss), AC 25, regrows 50 HP a turn (Hashirama's cells and the God
+246 HP, AC 18, regrows 10 HP a turn (Hashirama's cells and the God
 Tree: he recovered from being cut in half), flies. Six Paths
 Senjutsu: spells and quickhacks don't take, spell saves always succeed, nothing kills him outright (the
-Crucible, an Execution), and any single hit under 100 damage from below the raid tier does nothing (the Seventh
-Gate punch did nothing and Daytime Tiger only pushed him back; Night Guy took half his body). Truth-Seeking Balls
-(+24, 10d10+15 force, three a turn, cancelling resistance and Nayru's Love alike), Chibaku Tensei (recharge 5-6:
-30d10 to everyone, Dex 32 half, and held), Limbo's shadows as his Legendary Actions (+24, 6d10+15, unseen); the
+Crucible, an Execution); ladder hits convert to almost nothing (the Seventh Gate punch did nothing and Daytime
+Tiger only pushed him back), and Night Guy, an E2 technique, took half his body. Truth-Seeking Balls (+17, 2d10+3
+force, three a turn, cancelling resistance and Nayru's Love alike), Chibaku Tensei (recharge 5-6: 6d10 to
+everyone, Dex 25 half, and held), Limbo's shadows as his Legendary Actions (+17, 2d6+2, unseen); the
 shadows time out after three of his turns and need two to come back (ch 674), and in between his Legendary
 Actions throw a Truth-Seeking Ball (costs 2). The first energy blast he sees coming each round is eaten by a
 Truth-Seeking Ball (in Phase 1 the Preta Path drinks it and heals him 30); not while he's held or blinded. At the start
@@ -35,7 +35,10 @@ from ..engine import Combatant, attack, d, d20, roll
 
 class Madara(Combatant):
     name = "Madara"; danger = 10; caster = True
-    raid_boss = True; legendary_actions = 3; tier = 2
+    raid_boss = True; legendary_actions = 3
+
+    @property
+    def tier(self): return 2 if getattr(self, "phase", 1) == 2 else 1      # the Edo body is ladder-top; the jinchuriki is the moon
 
     def __init__(self):
         super().__init__()
@@ -60,8 +63,8 @@ class Madara(Combatant):
         if self.phase == 1: self.sealed = True; fight.note("the Totsuka seals Madara"); self.out = True
 
     def phase_two(self):
-        self.phase = 2; self.hp = self.maxhp = 1230; self.ac = 25; self.thp = 0
-        self.saves = dict(Str=15, Dex=24, Con=24, Int=16, Wis=19, Cha=7); self.limbo = 0; self.gaze = True
+        self.phase = 2; self.hp = self.maxhp = 246; self.ac = 18; self.thp = 0
+        self.saves = dict(Str=8, Dex=17, Con=17, Int=16, Wis=19, Cha=7); self.limbo = 0; self.gaze = True
         self.paralyzed = False; self.asleep = False; self.charmed = None; self.burning = False; self.dread = False
         self.effects = []; self.p2_turns = 0; self.perfect = False
 
@@ -82,11 +85,6 @@ class Madara(Combatant):
 
     def negates_spells(self): return self.phase == 2
     def sealable(self): return self.phase == 1
-
-    def modify_incoming(self, dmg, dtype, src, from_attack, melee, ignore_res):
-        if self.phase == 2 and dmg < 100 and self.fight and self.fight.tier_of(src) < 2:
-            return 0                       # the threshold: nothing below the raid tier gets through
-        return dmg
 
     def defend_ac(self, att, total, melee, crit):
         # the first energy blast at him each round: the Preta Path drinks it, or a Truth-Seeking Ball eats it
@@ -114,7 +112,7 @@ class Madara(Combatant):
         if self.phase == 1:
             attack(fight, self, tgt, 16, lambda c: roll(6 if c else 3, 10) + 7, "bludgeoning", True)
         else:
-            attack(fight, self, tgt, 24, lambda c: (roll(12 if c else 6, 10) + 15) if lim else (roll(20 if c else 10, 10) + 15),
+            attack(fight, self, tgt, 17, lambda c: (roll(4 if c else 2, 6) + 2) if lim else (roll(4 if c else 2, 10) + 3),
                    "bludgeoning" if lim else "force", not lim, adv=lim, ignore_res=True, ignore_imm=True)
 
     def genjutsu(self, fight, enemies):
@@ -165,13 +163,13 @@ class Madara(Combatant):
         # Phase 2
         self.p2_turns += 1
         self.limbo = (self.limbo + 1) % 5          # shadows out for three turns, then two to come back
-        self.hp = min(self.maxhp, self.hp + 50)
+        self.hp = min(self.maxhp, self.hp + 10)
         if self.p2_turns >= 4 and fight.moon and not self.dreamed:
             self.dreamed = True; self.infinite_tsukuyomi(fight); return
         if self.genjutsu(fight, enemies): return
         if not self.chibaku and d(6) >= 5: self.chibaku = True
         if self.chibaku and len(enemies) >= 2:
-            self.chibaku = False; self.everyone(fight, 30, 32, "bludgeoning", rider=self.held); return
+            self.chibaku = False; self.everyone(fight, 6, 25, "bludgeoning", rider=self.held); return
         for i in range(3):
             tgt = fight.pick_target(self)
             if not tgt: return

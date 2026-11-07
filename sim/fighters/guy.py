@@ -2,7 +2,8 @@
 Sheet: Might_Guy_Canon_5e_Build.pdf. 263 HP, AC 19, seven gates open on turn one, Morning Peacock
 and Flurry with Stunning Strike; Daytime Tiger (30d12+7) when two or more melee enemies crowd him;
 the Eighth Gate below 70 HP for Evening Elephant with advantage, then Night Guy (60d12+15, ignores
-immunity) on the next turn, and then he dies."""
+immunity) on the next turn, and then he dies. Night Guy is an E2 technique (20d12 in moon units): the one ladder
+move that took half of Ten-Tails Madara's body, and more than any ladder body can take."""
 from ..engine import Combatant, attack, d, d20, roll
 
 
@@ -76,7 +77,7 @@ class Guy(Combatant):
                 return
             # Night Guy: automatic, unreducible, ignores immunity; then the Gate of Death closes
             self.night_used = True
-            tgt.take(roll(60, 12) + 15, "force", "Night Guy", ignore_res=True, ignore_imm=True)
+            tgt.take(roll(20, 12), "force", "Night Guy", ignore_res=True, ignore_imm=True, exp=2)
             self.g8 = "spent"
             if fight.over(): return
             self.hp = 0; self.out = True
