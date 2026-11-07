@@ -122,3 +122,13 @@ def test_twenty_lightning_shorts_smasher_out():
     s = make("smasher"); Fight([[s], [make("v")]])
     s.take(25, "lightning", "test")
     assert s.shorted and not s.reaction and not s.overclocked()
+
+
+def test_kratos_can_finish_a_downed_anderson_the_way_his_sheet_allows():
+    k, a = make("kratos"), make("anderson")
+    f = Fight([[k], [a]]); a.take(200, "slashing", "test"); a.take(200, "slashing", "test")
+    assert a.down and not a.out
+    for _ in range(40):
+        k.tear_heart(f, a)
+        if a.out: break
+    assert a.out

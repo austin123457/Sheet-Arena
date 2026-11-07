@@ -22,7 +22,7 @@ NAMES = {
     "smasher": "Smasher", "jin": "Jin", "guy": "Guy", "might-guy": "Guy",
     "slayer": "Slayer", "doomslayer": "Slayer", "link": "Link", "hero-of-time": "Link", "beast": "Beast",
     "battle-beast": "Beast", "anderson": "Anderson", "arthur": "Arthur", "spike": "Spike", "talion": "Talion",
-    "v": "V", "v-sandy": "V-sandy", "v-deck": "V-deck",
+    "kratos": "Kratos", "v": "V", "v-sandy": "V-sandy", "v-deck": "V-deck",
 }
 
 
