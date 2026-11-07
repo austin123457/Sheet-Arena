@@ -29,9 +29,16 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 
 Free-for-all with everyone: Link about 70–90%, the Slayer most of the rest. Nobody beats the rest of the roster at once.
 
-## How the code is shaped (and the first thing to fix)
+## How the code is shaped
 
-`sim/arena.py` has the engine: dice, the `C` combatant base, `attack()`, `Fight`, and the first six fighters. Every later file imports the previous one and adds a fighter, sometimes monkeypatching `attack` or `Fight.run` on the way (`guy_arena -> guy2_arena -> guy_canon -> slayer_arena -> crane2_arena -> link_arena -> bb_arena -> anderson_arena -> arthur_arena -> spike_arena`). `sim/roster.py` imports the end of the chain. It works and it is ugly. The obvious first task is to flatten it: one `engine.py`, one file per fighter under `sim/fighters/`, the patches folded into the engine as real hooks (`ignores_immunity`, `stunned`, `retaliate`), and the fighter policies pulled out of `turn()` into something a human can read. `duel*.py` are the narrated single-fight loggers from the first bouts and are kept for the round-by-round output format.
+- `sim/engine.py`: dice, the `Combatant` base class, `attack()` and `Fight`. Anything one fighter does to another's attack, save or turn is a hook on `Combatant` (listed at the top of the file): `incoming_attack`, `immune`/`ignore_imm`, `answer_standoff`, `retaliate` and the rest. Nothing patches the engine from outside.
+- `sim/fighters/`: one file per sheet. Rules that other sheets check are traits on the class (`caster`, `evil`, `evasion`, `never_stunned`, `shrugs_stunning_strike`, `averts_eyes`, `danger`...), not name lists.
+- `sim/roster.py`: command-line names onto fighters.
+- `sim/duels/`: the narrated single-fight loggers from the first bouts, kept for the round-by-round output format. Standalone.
+
+To add a fighter: a new file in `sim/fighters/`, a line in `sim/fighters/__init__.py`, a name in `roster.py`, and the key in `ROSTER` in `battle.py`.
+
+The flattening (Nov 2026) changed no results: on 5,564 seeded fights (every 1v1 pairing, both free-for-alls, every solo and 400 random teams) the old chain and the new layout produced the same winner, rounds, final HP and dice count for every fight. The known quirks it preserved are marked `NOTE:` in the fighter files.
 
 ## Sheets
 

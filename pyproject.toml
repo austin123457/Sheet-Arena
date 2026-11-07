@@ -7,3 +7,6 @@ dependencies = []
 [project.optional-dependencies]
 sheets = ["reportlab", "pypdf"]
 test = ["pytest"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

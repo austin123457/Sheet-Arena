@@ -9,9 +9,9 @@
   python battle.py list                            the roster
 
 Dice come from the OS (secrets); nothing is seeded. Fights cap at 40 rounds (a draw)."""
-import argparse, itertools, sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "sim"))
-from roster import make, NAMES, MAKERS, Fight, Counter
+import argparse
+from sim.engine import ROUND_CAP
+from sim.roster import make, NAMES, Fight, Counter
 
 ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs"]
 
@@ -19,7 +19,7 @@ def run(teams, n):
     wins = Counter(); rounds = 0; draws = 0
     for _ in range(n):
         f = Fight([[make(x) for x in t] for t in teams]); res, r = f.run(); rounds += r
-        if r >= 40: draws += 1
+        if r >= ROUND_CAP: draws += 1
         else: wins[res] += 1
     return wins, draws, rounds / n
 
