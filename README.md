@@ -2,7 +2,7 @@
 
 D&D 5e (2024 rules) character sheets for fictional characters, built canon-first, and a dice-driven arena that fights them against each other.
 
-Thirteen fighters, one sheet each: Goblin Slayer, Guts, Kyle Crane, Itachi Uchiha, Adam Smasher, Jin Sakai, Might Guy (the canon merge), the Doom Slayer, Link the Hero of Time, Battle Beast, Alexander Anderson, Arthur Morgan, Spike Spiegel. Talion's sheet is in `sheets/pdf/` too but he isn't in the arena yet. The sheets are PDFs in `sheets/pdf/`; the scripts that render the ones Claude built are in `sheets/build/` (reportlab). Caleb's sheets (Smasher, Jin, Crane, Battle Beast, Arthur, Talion) are PDFs only.
+Fourteen fighters, one sheet each: Goblin Slayer, Guts, Kyle Crane, Itachi Uchiha, Adam Smasher, Jin Sakai, Might Guy (the canon merge), the Doom Slayer, Link the Hero of Time, Battle Beast, Alexander Anderson, Arthur Morgan, Spike Spiegel, Talion. The sheets are PDFs in `sheets/pdf/`; the scripts that render the ones Claude built are in `sheets/build/` (reportlab). Caleb's sheets (Smasher, Jin, Crane, Battle Beast, Arthur, Talion) are PDFs only.
 
 ## Run a fight
 
@@ -24,23 +24,25 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 - Evasion works for everyone whose sheet has it (Jin, Guy, Spike): nothing on a made Dex save, half on a failed one, unless they're incapacitated.
 - Anderson dies only to a single blow for his full 284 hit points (heart-tearing isn't modelled: nobody here grapples) or once the Nail is in and breaks. Down, he gets up at 30 at the start of his turn unless 20 radiant or fire landed on him since his last one.
 - Peak versions: living, healthy Itachi (the Edo body can't lose to anyone without a seal); canon Guy with Night Guy at 60d12.
-- Itachi in the arena uses Susanoo (Yata Mirror, Totsuka), Tsukuyomi, Amaterasu, Izanami, Hold Person, Fireball, Mirror Image, Shield, Illusory Self and Fire Bolt. Not yet modelled from his sheet: Dominate Person, Phantasmal Killer, Mislead, Shadow Clone, Yasaka Magatama, Counterspell, Hypnotic Pattern and the Sneak Attack kunai.
+- Itachi fights with his whole slot table (4/3/3/3/2/1/1/1/1) and concentration: genjutsu first (Tsukuyomi on whoever will probably fail it), Susanoo when what is coming would kill him, then Totsuka or Yasaka Magatama inside it, Amaterasu for the one who can't be reached, and once Susanoo is gone Dominate Person, Hold Person, Phantasmal Killer or Phantasmal Force. Shadow Clone every time he has a spare 4th-level slot (the clone opens with Mind Sliver before his save spells, and enemies can't tell which Itachi is real), Mislead when he's low, Mirror Image, Shield and Illusory Self, Hypnotic Pattern and Fireball for groups, Counterspell against 3rd-level spells and up (Anderson's Haste and Hold Monster, Talion's Steel Wind Strike and Conjure Barrage). Each Mangekyo casting costs a level of exhaustion (-2 on his d20 tests; six is death) and Susanoo ending costs two, as his sheet says; he never spends the level that would kill him. Left out: what does nothing on open sand (Misty Step, Disguise Self, Silent Image, Dispel Magic, the rituals) and what is strictly worse than something he has (Scorching Ray and the kunai below Fire Bolt, Tidal Wave below Fireball, Summon Beast and Summon Fey, whose concentration he always has a better use for).
+- Battle Beast by his sheet: charm and fear immunity only while raging (no stun immunity), +27 on a natural 20, Hew after a crit or a kill, his Worthy Opponent has disadvantage attacking anyone else, Intimidating Presence (DC 22, a save each turn) on everyone not immune, paid for with Rage uses after the free one, and Glorious Death: one last swing at the worthy opponent who drops him for good.
+- Talion has no army here: Brand works only on orcs and beasts, and his sheet says it doesn't matter against one foe. Every arena fighter counts as a named captain, so Execution's kill gives them a Con save.
 
 ## Where the ladder stood on 6 Nov 2026 (300 fights per 1v1 cell, 500 free-for-alls)
 
-1v1, by average win rate: Doom Slayer 95%, Link 83%, Anderson 77%, Smasher 63%, Guy 60%, Jin 57%, Battle Beast 55%, Itachi 52%, Guts 41%, Arthur 32%, Crane 18%, Spike 13%, Goblin Slayer 2%.
+1v1, by average win rate: Doom Slayer 91%, Link 84%, Anderson 79%, Smasher 66%, Guy 62%, Battle Beast 59%, Jin 59%, Itachi 57%, Guts 46%, Arthur 38%, Crane 24%, Spike 19%, Talion 8%, Goblin Slayer 4%.
 
 What breaks the pattern:
 - Link and Anderson draw every time: Nayru's Love against a body that keeps getting up.
-- Itachi with Izanami working beats Anderson and Battle Beast (88%), Guts (76%) and Guy (56%), and takes the Slayer 19% of the time. He still loses to Smasher (Mage Slayer and the ICE, 2%), and Arthur and Spike usually kill him before he casts (Arthur wins 95%).
-- Anderson, Itachi and Guy are the only ones who beat the Slayer with any regularity (14–20%).
+- Itachi is the upset machine. Tsukuyomi on a low Wisdom save ends a fight before it starts, so he beats the Slayer (79%), Anderson (81%), Battle Beast (93%), Guts (72%) and Talion (85%). He still loses to Smasher (Mage Slayer and the ICE, 1%), Arthur (who kills him before he casts, 0%) and Link (5%).
+- Talion's 224 HP behind AC 17 and a +3 Con save are the trouble: Spike and Crane stun him out of his turns, and every hit he takes costs two Might, so Elven Rage rarely comes up against anyone who attacks often. He beats Goblin Slayer (88%) and sometimes Itachi.
 
-Free-for-all with everyone: Link 68%, Smasher 8%, Anderson 5%, draws 15%; the Slayer almost never survives the crowd that goes for him. Nobody beats the rest of the roster at once (solo is 0% for everyone; twelve fighters end it in the first round).
+Free-for-all with everyone: Link 62%, Anderson 6%, Smasher 6%, draws 20%. Nobody beats the rest of the roster at once (solo is 0% for everyone; the crowd ends it in the first round).
 
 ## How the code is shaped
 
 - `sim/engine.py`: dice, the `Combatant` base class, `attack()` and `Fight`. Anything one fighter does to another's attack, save or turn is a hook on `Combatant` (listed at the top of the file): `incoming_attack`, `immune`/`ignore_imm`, `answer_standoff`, `retaliate` and the rest. Nothing patches the engine from outside.
-- `sim/fighters/`: one file per sheet. Rules that other sheets check are traits on the class (`caster`, `evil`, `evasion`, `never_stunned`, `shrugs_stunning_strike`, `averts_eyes`, `danger`...), not name lists.
+- `sim/fighters/`: one file per sheet. Rules that other sheets check are traits on the class (`caster`, `evil`, `evasion`, `never_stunned`, `shrugs_stunning_strike`, `averts_eyes`, `humanoid`, `danger`...), not name lists. Conditions (charmed, frightened, dread, invisible, sapped...) and summons are handled by the engine for everyone.
 - `sim/roster.py`: command-line names onto fighters.
 - `sim/duels/`: the narrated single-fight loggers from the first bouts, kept for the round-by-round output format. Standalone.
 

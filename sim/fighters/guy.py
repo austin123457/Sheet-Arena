@@ -19,8 +19,8 @@ class Guy(Combatant):
     def init(self): return d(20) + 13
     def ac_now(self): return self.ac + (2 if self.gate >= 4 else 0)
 
-    def save(self, ab, dc, spell=False):
-        ok = super().save(ab, dc, spell)
+    def save(self, ab, dc, spell=False, kind=None, adv=False):
+        ok = super().save(ab, dc, spell, kind, adv)
         if not ok and self.focus > 0:
             self.focus -= 1; ok = d20(adv=(ab == "Str" and self.gate >= 1)) + self.saves[ab] >= dc
         return ok

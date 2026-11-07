@@ -62,3 +62,35 @@ def test_izanami_counts_separate_turns():
     for rnd in (1, 1, 2):
         f.round = rnd; it.struck_on.setdefault(gs, set()).add(rnd)
     assert it.turns_struck_by(gs) == 2
+
+
+def test_a_shadow_clone_never_wins_the_fight_for_a_dead_itachi():
+    from sim.fighters.itachi import ShadowClone
+    it, gs = make("itachi"), make("gs")
+    f = Fight([[it], [gs]]); clone = ShadowClone(it); f.add(clone, it.team)
+    it.out = True
+    assert not clone.alive() and f.over()
+
+
+def test_battle_beast_shrugs_off_charm_and_fear_only_while_raging():
+    b = make("beast")
+    assert not b.charm_immune and not b.fright_immune
+    b.raging = True
+    assert b.charm_immune and b.fright_immune
+
+
+def test_hypnotic_pattern_breaks_on_any_damage():
+    g = make("guts"); g.charmed = {"mode": "pattern", "by": None, "dc": 19}
+    g.take(5, "fire", "test")
+    assert g.charmed is None
+
+
+def test_mangekyo_costs_exhaustion():
+    it = make("itachi"); it.exhaust(2)
+    assert it.saves["Wis"] == 7 - 4 and it.atk() == 11 - 4
+
+
+def test_talion_loses_might_when_hit():
+    t = make("talion"); t.might = 5
+    t.take(10, "slashing", "test", from_attack=True)
+    assert t.might == 3

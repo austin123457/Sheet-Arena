@@ -18,8 +18,8 @@ class Link(Combatant):
 
     def init(self): return d(20) + 11
 
-    def save(self, ab, dc, spell=False):
-        ok = super().save(ab, dc, spell)
+    def save(self, ab, dc, spell=False, kind=None, adv=False):
+        ok = super().save(ab, dc, spell, kind, adv)
         if not ok and self.triforce: self.triforce = False; ok = True
         return ok
 

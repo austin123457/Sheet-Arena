@@ -13,7 +13,7 @@ import argparse
 from sim.engine import ROUND_CAP
 from sim.roster import make, NAMES, Fight, Counter
 
-ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs"]
+ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs", "talion"]
 
 def run(teams, n):
     wins = Counter(); rounds = 0; draws = 0

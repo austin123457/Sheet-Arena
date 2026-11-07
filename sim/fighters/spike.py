@@ -16,8 +16,8 @@ class Spike(Combatant):
 
     def init(self): return d20(adv=True) + 11
 
-    def save(self, ab, dc, spell=False):
-        ok = super().save(ab, dc, spell)
+    def save(self, ab, dc, spell=False, kind=None, adv=False):
+        ok = super().save(ab, dc, spell, kind, adv)
         if not ok and self.focus > 0: self.focus -= 1; ok = d20() + self.saves[ab] >= dc
         if not ok and self.luck > 0: self.luck -= 1; ok = d20(adv=True) + self.saves[ab] >= dc
         return ok

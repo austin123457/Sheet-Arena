@@ -16,6 +16,16 @@ Hooks a fighter can override (all default to doing nothing):
   before_first_round    act before initiative (Jin's Standoff)
   answer_standoff   what you do when you win Jin's Standoff
   retaliate         swing back after a melee hit (set retaliates = True)
+  on_missed         react when an attack misses you (Talion's Riposte; queue it with fight.after_turn)
+  counter_spell     react when an enemy casts a spell: return True to stop it (Itachi's Counterspell)
+
+Conditions the engine handles for everyone: paralyzed/stunned (stun_until), asleep, charmed (Dominate
+Person breaks on a save when hurt, Hypnotic Pattern on any damage; a dominated creature turns on its own
+allies if it has any and otherwise stands still), dread (disadvantage on attacks), sliver (-1d4 on the
+next save), effects (callables run at the end of the creature's turn; return False to end), frightened (fear_dc: a Wis save at the end of each turn ends it), invisible, sapped (disadvantage
+on your next attack), and a worthy opponent's mark (disadvantage on attacks against anyone else).
+Summons (summon = True, owner = the caster) act on their owner's turn, vanish with him, and never
+count for winning.
 """
 import secrets
 
@@ -56,6 +66,8 @@ class Combatant:
     averts_eyes = False             # Itachi doesn't bother with Tsukuyomi
     retaliates = False              # Fight.run calls retaliate() after an enemy's turn that hit you in melee
     susanoo = False                 # Itachi's ribcage is up: no prone, no topple
+    humanoid = True                 # Hold Person and Dominate Person need it
+    summon = False                  # a clone or a conjured creature: see Fight.over()
 
     def __init__(self):
         self.out = False; self.team = None; self.acted = False
@@ -65,17 +77,23 @@ class Combatant:
         self.struck_on = {}; self.indomitable = 0; self.indom_bonus = 0
         self.last_hit_by_melee = None; self.adjacent = set(); self.trip_done = False
         self.surge_used = False; self.down = False; self.death_fail = 0
+        self.charmed = None; self.fear_dc = 0; self.invisible = False; self.sapped = False; self.marked_by = None
+        self.owner = None; self.fight = None; self.dread = False; self.sliver = False; self.effects = []
 
-    def alive(self): return not self.out
-    def can_act(self): return self.alive() and not self.paralyzed
+    def alive(self): return not self.out and (self.owner is None or self.owner.alive())
+    def incapacitated(self): return self.paralyzed or self.asleep or self.charmed is not None
+    def can_act(self): return self.alive() and not self.incapacitated()
     def init(self): return d(20)
     def ac_now(self): return self.ac
 
     # ---------- saves ----------
-    def save(self, ab, dc, spell=False):
-        adv = self.save_adv(ab, spell)
-        if self.paralyzed and ab in ("Str", "Dex"): return False
-        ok = d20(adv=adv) + self.saves[ab] >= dc
+    def save(self, ab, dc, spell=False, kind=None, adv=False):
+        """kind names what the save is against when it matters: "charm", "fear", "illusion", "enchantment"."""
+        adv = adv or self.save_adv(ab, spell)
+        if (self.paralyzed or self.asleep) and ab in ("Str", "Dex"): return False
+        pen = 0
+        if self.sliver: self.sliver = False; pen = d(4)        # Mind Sliver
+        ok = d20(adv=adv) + self.saves[ab] - pen >= dc
         if not ok and self.shrug_off_save(ab, spell): return True
         if not ok and self.indomitable > 0:
             self.indomitable -= 1
@@ -93,6 +111,10 @@ class Combatant:
         a = min(self.thp, dmg); self.thp -= a
         self.hp -= dmg - a
         self.after_damage(dmg, dtype, src, melee)
+        if self.charmed is not None:
+            # Hypnotic Pattern breaks on any damage; Dominate Person gets a new save
+            c = self.charmed
+            if c["mode"] == "pattern" or self.save("Wis", c["dc"], spell=True, kind="charm"): self.charmed = None
         if self.hp <= 0: self.hp = 0; self.on_zero(src, crit)
         return dmg
     def immune(self, dtype): return False
@@ -103,7 +125,7 @@ class Combatant:
     def dex_damage(self, saved, dmg):
         """Damage from a Dex-save-for-half effect, after the save. Evasion: nothing on a success and half on a
         failure, unless he's incapacitated."""
-        if self.evasion and not (self.paralyzed or self.asleep): return 0 if saved else dmg // 2
+        if self.evasion and not self.incapacitated(): return 0 if saved else dmg // 2
         return dmg // 2 if saved else dmg
 
     def turns_struck_by(self, attacker):
@@ -115,6 +137,8 @@ class Combatant:
     def defend_ac(self, attacker, total, melee, crit): return 0
     def reduce_hit(self, dmg, melee): return dmg
     def on_targeted_by_spell(self, fight, caster): pass
+    def on_missed(self, fight, attacker, melee): pass
+    def counter_spell(self, fight, caster, level): return False
 
     # ---------- your own attacks ----------
     def attack_advantage(self, target): return False
@@ -129,13 +153,22 @@ class Combatant:
     def start_turn(self):
         self.reaction = True; self.disadv_attacks = False; self.sa_used = False
         if self.prone: self.prone = False
-        if self.burning: self.take(roll(4, 10), "fire", "Amaterasu", ignore_res=True)
+        if self.burning: amaterasu(self, roll(4, 10))
     def turn(self, fight): pass
     def end_turn(self, fight):
+        if self.effects: self.effects = [fn for fn in self.effects if fn(self)]
+        if self.frightened and self.fear_dc and self.save("Wis", self.fear_dc, kind="fear"):
+            self.frightened = False; self.fear_dc = 0
         # a stun lasts until the end of the stunned creature's next turn; anything else paralyzing gets a save
         if self.stun_until is not None and self.paralyzed:
             self.paralyzed = False; self.stun_until = None; return
         if self.paralyzed and self.save("Wis", 19, spell=True): self.paralyzed = False
+
+
+def amaterasu(tgt, dmg):
+    """The black flames ignore resistance to fire and treat immunity as resistance."""
+    if tgt.immune("fire"): dmg //= 2
+    return tgt.take(dmg, "fire", "Amaterasu", ignore_res=True, ignore_imm=True)
 
 
 def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=False, crit_range=20,
@@ -146,6 +179,11 @@ def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=Fal
     if tgt.reckless or tgt.prone or tgt.paralyzed or tgt.asleep: adv = True
     if att.poisoned or att.disadv_attacks or att.prone or att.frightened: dis = True
     if att.attack_advantage(tgt): adv = True
+    if tgt.invisible: dis = True
+    if att.invisible: adv = True
+    if att.sapped: dis = True; att.sapped = False
+    if att.dread: dis = True
+    if att.marked_by is not None and att.marked_by.alive() and tgt is not att.marked_by: dis = True
     nat = d20(adv=adv, dis=dis)
     total = nat + bonus
     crit = nat >= crit_range
@@ -155,6 +193,7 @@ def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=Fal
     hit = crit or (nat != 1 and total >= ac)
     if not hit:
         att.on_miss(fight, tgt, total, ac, melee)
+        tgt.on_missed(fight, att, melee)
         return (False, False, 0)
     tgt.struck_on.setdefault(att, set()).add(fight.round)
     dmg = dmg_fn(crit)
@@ -176,8 +215,17 @@ class Fight:
     def __init__(self, teams, verbose=False):
         self.teams = teams; self.all = [c for t in teams for c in t]
         for i, t in enumerate(teams):
-            for c in t: c.team = i; c.acted = False
-        self.round = 0; self.notes = []; self.verbose = verbose
+            for c in t: c.team = i; c.acted = False; c.fight = self
+        self.round = 0; self.notes = []; self.verbose = verbose; self.pending = []
+    def add(self, c, team):
+        """Bring a summon into the fight on a team; it acts on its owner's turn, not in initiative."""
+        c.team = team; c.fight = self; c.acted = True; self.all.append(c)
+    def after_turn(self, fn):
+        """Run fn once the current creature's turn is over (reactions that would interrupt a turn)."""
+        self.pending.append(fn)
+    def cast(self, caster, level):
+        """caster casts a spell of this level; an enemy may stop it. Returns False if countered."""
+        return not any(e.counter_spell(self, caster, level) for e in self.enemies(caster))
     def note(self, m):
         if self.verbose: self.notes.append(f"R{self.round}: {m}")
     def enemies(self, c): return [e for e in self.all if e.alive() and e.team != c.team]
@@ -187,10 +235,11 @@ class Fight:
         es = self.enemies(c)
         if not es: return None
         casters = [e for e in es if e.caster]
-        if casters and not c.caster: return casters[0]
+        if casters and not c.caster:
+            return casters[0] if len(casters) == 1 else casters[d(len(casters)) - 1]   # which Itachi is real?
         return min(es, key=lambda e: (e.hp + e.thp) / (e.maxhp + 1))
     def over(self):
-        return len({c.team for c in self.all if c.alive()}) <= 1
+        return len({c.team for c in self.all if c.alive() and not c.summon}) <= 1
     def run(self):
         order = sorted(self.all, key=lambda c: c.init(), reverse=True)
         for c in self.all: c.before_first_round(self)
@@ -202,12 +251,18 @@ class Fight:
                 c.start_turn()
                 c.acted = True
                 for e in self.all: e.trip_done = False
-                if c.paralyzed or c.asleep:
+                if c.incapacitated():
+                    ch = c.charmed
+                    if ch and ch["mode"] == "dominate" and not (c.paralyzed or c.asleep) and self.allies(c):
+                        home = c.team; c.team = ch["by"].team      # commanded against its own side
+                        c.turn(self); c.team = home
                     c.end_turn(self); continue
                 c.turn(self)
                 c.end_turn(self)
+                for fn in self.pending: fn()
+                self.pending = []
                 for g in self.all:
                     if g.retaliates and g.alive() and g.last_hit_by_melee is c and c.alive() and g is not c:
                         g.retaliate(self, c); g.last_hit_by_melee = None
-        alive_teams = {c.team for c in self.all if c.alive()}
+        alive_teams = {c.team for c in self.all if c.alive() and not c.summon}
         return (next(iter(alive_teams)) if alive_teams else None), self.round

@@ -17,8 +17,8 @@ class Slayer(Combatant):
     def init(self): return d20(adv=True) + 4
     def save_adv(self, ab, spell): return ab == "Dex"
 
-    def save(self, ab, dc, spell=False):
-        ok = super().save(ab, dc, spell)
+    def save(self, ab, dc, spell=False, kind=None, adv=False):
+        ok = super().save(ab, dc, spell, kind, adv)
         if not ok and self.ff and self.raging:
             self.ff = False; ok = d20(adv=self.save_adv(ab, spell)) + self.saves[ab] + 3 >= dc
         return ok
