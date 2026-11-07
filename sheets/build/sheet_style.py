@@ -7,8 +7,13 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.platypus.flowables import HRFlowable
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import os
 FD = "/usr/share/fonts/truetype/dejavu/"
-for n, f in [("DVS","DejaVuSansCondensed.ttf"),("DVS-B","DejaVuSansCondensed-Bold.ttf"),("DVS-I","DejaVuSansCondensed-Oblique.ttf"),("DVS-BI","DejaVuSansCondensed-BoldOblique.ttf"),("DVSerif-B","DejaVuSerif-Bold.ttf")]:
+FONTS = [("DVS","DejaVuSansCondensed.ttf"),("DVS-B","DejaVuSansCondensed-Bold.ttf"),("DVS-I","DejaVuSansCondensed-Oblique.ttf"),("DVS-BI","DejaVuSansCondensed-BoldOblique.ttf"),("DVSerif-B","DejaVuSerif-Bold.ttf")]
+if not os.path.isdir(FD):      # no DejaVu (Windows): Calibri and Georgia under the same names
+    FD = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts") + os.sep
+    FONTS = [("DVS","calibri.ttf"),("DVS-B","calibrib.ttf"),("DVS-I","calibrii.ttf"),("DVS-BI","calibriz.ttf"),("DVSerif-B","georgiab.ttf")]
+for n, f in FONTS:
     pdfmetrics.registerFont(TTFont(n, FD + f))
 pdfmetrics.registerFontFamily("DVS", normal="DVS", bold="DVS-B", italic="DVS-I", boldItalic="DVS-BI")
 INK = colors.HexColor("#1b1b1b"); GREEN = colors.HexColor("#1f6b2f"); STEEL = colors.HexColor("#3f4a3f"); PARCH = colors.HexColor("#f1f4ec"); GRID = colors.HexColor("#c3c9bd"); MUTED = colors.HexColor("#67645f")

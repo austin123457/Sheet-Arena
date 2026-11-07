@@ -1,4 +1,4 @@
-exec(open('sheet_style.py').read())
+exec(open('sheet_style.py', encoding='utf-8').read())
 GREEN = colors.HexColor("#8a1c1c")   # Doom red, reused by every helper
 h2 = ParagraphStyle("h2", fontName="DVSerif-B", fontSize=12.5, leading=16, textColor=GREEN, spaceBefore=11, spaceAfter=3)
 hb_name = ParagraphStyle("hn", fontName="DVS-B", fontSize=9.6, leading=12.6, textColor=GREEN, spaceBefore=5, spaceAfter=1)

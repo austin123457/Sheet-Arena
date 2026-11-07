@@ -59,7 +59,7 @@ class Anderson(Combatant):
         if not self.nail and self.times_down >= 3 and (tgt.hp + tgt.thp) > 0.5 * tgt.maxhp:
             self.nail = True; self.hp = min(284, self.hp + 60); return
         if not self.haste and self.slots[3] > 0 and not (tgt.saves.get("Wis", 0) <= 3 and not self.hold_used and self.slots[5] > 0):
-            if fight.cast(self, 3): self.slots[3] -= 1; self.haste = True     # a countered spell keeps its slot
+            if fight.cast(self, 3): self.slots[3] -= 1; self.haste = True; fight.speeds_up(self)     # a countered spell keeps its slot
             return
         # Hold Monster on a weak-willed target (not Smasher, whose Mage Slayer and advantage eat it)
         if not self.hold_used and tgt.saves.get("Wis", 0) <= 3 and self.slots[5] > 0 and not tgt.paralyzed and tgt.name != "Smasher":

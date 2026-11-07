@@ -18,6 +18,7 @@ Hooks a fighter can override (all default to doing nothing):
   retaliate         swing back after a melee hit (set retaliates = True)
   on_missed         react when an attack misses you (Talion's Riposte; queue it with fight.after_turn)
   counter_spell     react when an enemy casts a spell: return True to stop it (Itachi's Counterspell)
+  on_enemy_speeds_up  react when an enemy switches on a Sandevistan or Haste (Smasher's Counter-Sandevistan)
 
 Conditions the engine handles for everyone: paralyzed/stunned (stun_until), asleep, charmed (Dominate
 Person breaks on a save when hurt, Hypnotic Pattern on any damage; a dominated creature turns on its own
@@ -79,6 +80,7 @@ class Combatant:
         self.surge_used = False; self.down = False; self.death_fail = 0
         self.charmed = None; self.fear_dc = 0; self.invisible = False; self.sapped = False; self.marked_by = None
         self.owner = None; self.fight = None; self.dread = False; self.sliver = False; self.effects = []
+        self.ambushed = False      # disadvantage on the next save (a hack out of hiding)
 
     def alive(self): return not self.out and (self.owner is None or self.owner.alive())
     def incapacitated(self): return self.paralyzed or self.asleep or self.charmed is not None
@@ -93,7 +95,8 @@ class Combatant:
         if (self.paralyzed or self.asleep) and ab in ("Str", "Dex"): return False
         pen = 0
         if self.sliver: self.sliver = False; pen = d(4)        # Mind Sliver
-        ok = d20(adv=adv) + self.saves[ab] - pen >= dc
+        dis = self.ambushed; self.ambushed = False
+        ok = d20(adv=adv, dis=dis) + self.saves[ab] - pen >= dc
         if not ok and self.shrug_off_save(ab, spell): return True
         if not ok and self.indomitable > 0:
             self.indomitable -= 1
@@ -139,6 +142,7 @@ class Combatant:
     def on_targeted_by_spell(self, fight, caster): pass
     def on_missed(self, fight, attacker, melee): pass
     def counter_spell(self, fight, caster, level): return False
+    def on_enemy_speeds_up(self, fight, who): pass
 
     # ---------- your own attacks ----------
     def attack_advantage(self, target): return False
@@ -223,6 +227,9 @@ class Fight:
     def after_turn(self, fn):
         """Run fn once the current creature's turn is over (reactions that would interrupt a turn)."""
         self.pending.append(fn)
+    def speeds_up(self, c):
+        """c switches on a Sandevistan, Haste or anything else that buys it extra actions."""
+        for e in self.enemies(c): e.on_enemy_speeds_up(self, c)
     def cast(self, caster, level):
         """caster casts a spell of this level; an enemy may stop it. Returns False if countered."""
         return not any(e.counter_spell(self, caster, level) for e in self.enemies(caster))

@@ -107,3 +107,18 @@ def test_cranes_perfect_block_only_when_six_more_ac_would_stop_it():
     c, g = make("crane"), make("guts")
     assert c.defend_ac(g, 25, True, False) == 0 and c.reaction
     assert c.defend_ac(g, 18, True, False) == 6 and not c.reaction
+
+
+def test_v_picks_his_operating_system_before_the_fight():
+    v, j = make("v"), make("jin")
+    Fight([[v], [j]]).run()
+    assert v.os == "deck"
+    v, s = make("v"), make("smasher")
+    f = Fight([[v], [s]]); v.before_first_round(f)
+    assert v.os == "sandy" and v.scalpel
+
+
+def test_twenty_lightning_shorts_smasher_out():
+    s = make("smasher"); Fight([[s], [make("v")]])
+    s.take(25, "lightning", "test")
+    assert s.shorted and not s.reaction and not s.overclocked()
