@@ -128,8 +128,8 @@ class Combatant:
         self.hp -= dmg - a
         if self.asleep: self.asleep = False          # being hurt wakes you
         self.after_damage(dmg, dtype, src, melee)
-        if self.charmed is not None:
-            # Hypnotic Pattern breaks on any damage; Dominate Person gets a new save
+        if self.charmed is not None and self.charmed["mode"] != "genjutsu":
+            # Hypnotic Pattern breaks on any damage; Dominate Person gets a new save; a genjutsu doesn't care
             c = self.charmed
             if c["mode"] == "pattern" or self.save("Wis", c["dc"], spell=True, kind="charm"): self.charmed = None
         if self.hp <= 0: self.hp = 0; self.on_zero(src, crit)
@@ -180,6 +180,8 @@ class Combatant:
     def turn(self, fight): pass
     def end_turn(self, fight):
         if self.effects: self.effects = [fn for fn in self.effects if fn(self)]
+        if self.charmed is not None and self.charmed["mode"] == "genjutsu":
+            self.charmed = None             # a gaze in a fight costs a turn; holding someone for good takes setup
         if self.frightened and self.fear_dc and self.save("Wis", self.fear_dc, kind="fear"):
             self.frightened = False; self.fear_dc = 0
         # a stun lasts until the end of the stunned creature's next turn; anything else paralyzing gets a save
@@ -274,6 +276,8 @@ class Fight:
         return len({c.team for c in self.all if c.alive() and not c.summon}) <= 1
     def run(self):
         order = sorted(self.all, key=lambda c: c.init(), reverse=True)
+        if all(c.tier >= 2 for c in self.all):
+            for c in self.all: c.legendary_resist = 0      # raid against raid: Legendary Resistance is a party-fight device, not a canon ability
         for c in self.all: c.before_first_round(self)
         while not self.over() and self.round < ROUND_CAP:
             self.round += 1
