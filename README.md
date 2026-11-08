@@ -22,7 +22,7 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 - Teams and free-for-alls coordinate on "the wizard first, then the lowest."
 - "Ignores Resistance" (Smasher's and Battle Beast's Irresistible Offense) does not pierce immunity. Only Night Guy and the Crucible are written to.
 - Guy's Gate of Death and Anderson's Nail are desperation moves (under 70 HP); Crane's Beast Meter starts empty after a rest; the Fierce Deity's Mask only works in a boss's lair, so Link never has it here; Izanami needs the target to have struck Itachi on two separate turns, and then it ends the fight.
-- Massive damage (5e's rule): a hit that drops you to 0 with at least your maximum HP left over kills you outright. Relentless Rage, Iron Will, death saves and the Berserker Armor don't answer it; only a way back from death does (Link's fairies). Raid bosses keep their own rules. On the ladder it's almost only Night Guy, which does about 14,000 to a 236-HP Guts.
+- Massive damage (5e's rule): a hit that drops you to 0 with at least your maximum HP left over kills you outright. Relentless Rage, Iron Will, death saves and the Berserker Armor don't answer it; only a way back from death does: Link's fairies, and Kratos's Out of Hades (he was dead every time he climbed out). V's Second Heart restarts a heart, not a body that isn't there, and Spike's Nine Lives is luck, so massive damage beats both; Talion's Banished from Death brings him back at the next nightfall, after the fight. Raid bosses keep their own rules. On the ladder it's almost only Night Guy, which does about 14,000 to a 236-HP Guts.
 - Evasion works for everyone whose sheet has it (Jin, Guy, Spike): nothing on a made Dex save, half on a failed one, unless they're incapacitated.
 - Anderson dies only to a single blow for his full 284 hit points, his heart torn out (see Kratos), or once the Nail is in and breaks. Down, he gets up at 30 at the start of his turn unless 20 radiant or fire landed on him since his last one.
 - Kratos is the one fighter who uses the heart clause on Anderson's sheet: once Anderson is down, he grapples him and wins a Strength contest. His Blades of Chaos keep the fire coming so nothing regrows in between.
@@ -35,7 +35,7 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 
 ## Where the ladder stood on 8 Nov 2026 (300 fights per 1v1 cell, 500 free-for-alls)
 
-1v1, by average win rate: Doom Slayer 92%, Link 86%, Anderson 75%, Guy 68%, Smasher 66%, Kratos 63%, V 57%, Itachi 56%, Battle Beast 54%, Talion 43%, Jin 38%, Crane 33%, Guts 30%, Arthur 27%, Spike 9%, Goblin Slayer 2%.
+1v1, by average win rate: Doom Slayer 92%, Link 86%, Anderson 75%, Guy 67%, Smasher 66%, Kratos 63%, V 57%, Itachi 56%, Battle Beast 54%, Talion 43%, Jin 38%, Crane 33%, Guts 30%, Arthur 27%, Spike 9%, Goblin Slayer 2%.
 
 The massive-damage rule moved Guy up and Jin down: Night Guy used to leave Relentless Rage and Iron Will something to save against.
 

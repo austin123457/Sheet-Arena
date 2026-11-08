@@ -45,6 +45,8 @@ class Kratos(Combatant):
         if self.hades: self.hades = False; self.hp = 1; return      # back out of the Underworld
         self.out = True
 
+    def on_massive(self, src): self.on_zero(src, False)      # he was dead every time he climbed out
+
     def before_first_round(self, fight):
         self.blades = any(hasattr(e, "radiant_taken") for e in fight.enemies(self))   # something that grows back
 

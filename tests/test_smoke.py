@@ -191,3 +191,6 @@ def test_massive_damage_kills_outright_but_a_fairy_still_answers_it():
     assert g2.down or g2.hp == 24
     f = l.fairies; l.take(5000, "force", "Guy", ignore_res=True, ignore_imm=True)
     assert l.alive() and l.fairies == f - 1 and l.hp == 90
+    k, v = make("kratos"), make("v-sandy"); Fight([[y], [k, v]])
+    k.take(9000, "force", "Guy", ignore_res=True); v.take(9000, "force", "Guy", ignore_res=True)
+    assert k.alive() and k.hp == 1 and not v.alive()   # out of Hades; a second heart doesn't help
