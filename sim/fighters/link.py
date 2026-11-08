@@ -34,6 +34,8 @@ class Link(Combatant):
         if self.fairies > 0: self.fairies -= 1; self.hp = 90; return
         self.out = True
 
+    def on_massive(self, src): self.on_zero(src, False)      # a fairy in a bottle brings you back from dead, too
+
     def turn(self, fight):
         tgt = fight.pick_target(self)
         if not tgt: return

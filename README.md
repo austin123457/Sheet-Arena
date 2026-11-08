@@ -22,6 +22,7 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 - Teams and free-for-alls coordinate on "the wizard first, then the lowest."
 - "Ignores Resistance" (Smasher's and Battle Beast's Irresistible Offense) does not pierce immunity. Only Night Guy and the Crucible are written to.
 - Guy's Gate of Death and Anderson's Nail are desperation moves (under 70 HP); Crane's Beast Meter starts empty after a rest; the Fierce Deity's Mask only works in a boss's lair, so Link never has it here; Izanami needs the target to have struck Itachi on two separate turns, and then it ends the fight.
+- Massive damage (5e's rule): a hit that drops you to 0 with at least your maximum HP left over kills you outright. Relentless Rage, Iron Will, death saves and the Berserker Armor don't answer it; only a way back from death does (Link's fairies). Raid bosses keep their own rules. On the ladder it's almost only Night Guy, which does about 14,000 to a 236-HP Guts.
 - Evasion works for everyone whose sheet has it (Jin, Guy, Spike): nothing on a made Dex save, half on a failed one, unless they're incapacitated.
 - Anderson dies only to a single blow for his full 284 hit points, his heart torn out (see Kratos), or once the Nail is in and breaks. Down, he gets up at 30 at the start of his turn unless 20 radiant or fire landed on him since his last one.
 - Kratos is the one fighter who uses the heart clause on Anderson's sheet: once Anderson is down, he grapples him and wins a Strength contest. His Blades of Chaos keep the fire coming so nothing regrows in between.
@@ -32,19 +33,21 @@ Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rou
 - Crane's finisher (a claw hit that leaves an ordinary creature at 15 HP or fewer kills it) never fires here: his sheet excludes bosses, and everyone in this arena is one. The same goes for V's Suicide, System Collapse, Cyberpsychosis and Memory Wipe.
 - V has one Operating System slot and picks before each fight: the Sandevistan by default, the cyberdeck against Jin, Battle Beast and Itachi (where it tested better). `v-sandy` and `v-deck` force one. Against Smasher he takes the Scalpel, because Smasher's sheet says 20 lightning from one source shorts him out (no Reactions, no Sandevistan until the end of his next turn), and Smasher's Counter-Sandevistan answers anyone who speeds up first (Anderson's Haste counts).
 
-## Where the ladder stood on 6 Nov 2026 (300 fights per 1v1 cell, 500 free-for-alls)
+## Where the ladder stood on 8 Nov 2026 (300 fights per 1v1 cell, 500 free-for-alls)
 
-1v1, by average win rate: Doom Slayer 91%, Link 86%, Anderson 75%, Smasher 65%, Kratos 63%, Guy 61%, V 57%, Battle Beast 55%, Itachi 54%, Talion 44%, Jin 42%, Crane 33%, Guts 30%, Arthur 27%, Spike 9%, Goblin Slayer 3%.
+1v1, by average win rate: Doom Slayer 92%, Link 86%, Anderson 75%, Guy 68%, Smasher 66%, Kratos 63%, V 57%, Itachi 56%, Battle Beast 54%, Talion 43%, Jin 38%, Crane 33%, Guts 30%, Arthur 27%, Spike 9%, Goblin Slayer 2%.
+
+The massive-damage rule moved Guy up and Jin down: Night Guy used to leave Relentless Rage and Iron Will something to save against.
 
 What breaks the pattern:
 - Link and Anderson draw every time: Nayru's Love against a body that keeps getting up.
-- Itachi is the upset machine. Tsukuyomi on a low Wisdom save ends a fight before it starts, so he beats the Slayer (79%), Anderson (84%), Battle Beast (90%), Guts (73%) and Talion (79%). He still loses to Smasher (Mage Slayer and the ICE), Arthur (who kills him before he casts) and Link.
-- Talion v2's Freeflow Counter turns melee hits into misses and feeds his Might, so he beats the melee middle of the ladder: Guts (97%), Spike (100%), Crane (91%), Jin (78%), Battle Beast (66%), and Guy about half the time. Anything that shoots him (Smasher, Arthur) or out-hits his counters (the Slayer, Anderson, Link) still wins.
+- Itachi is the upset machine. Tsukuyomi on a low Wisdom save ends a fight before it starts, so he beats the Slayer (81%), Anderson (84%), Battle Beast (91%), Guts (69%) and Talion (77%). He still loses to Smasher (Mage Slayer and the ICE), Arthur (who kills him before he casts) and Link.
+- Talion v2's Freeflow Counter turns melee hits into misses and feeds his Might, so he beats the melee middle of the ladder: Guts (98%), Spike (100%), Crane (91%), Jin (74%) and Battle Beast (68%). Anything that shoots him (Smasher, Arthur) or out-hits his counters (the Slayer, Anderson, Link, Guy) still wins.
 - Crane v3's claws (2d10+8, ignoring resistance, plus a bite) beat Jin and Guts about three times in four.
-- V vs Adam Smasher is close to a coin flip (V about 40%), the fight his whole game builds to.
+- V vs Adam Smasher is close to a coin flip (V about 45%), the fight his whole game builds to.
 - Kratos beats Anderson nine times in ten (fire, then the heart) and V every time (V's blades can't get through Rage resistance and the shield Parry). He loses to the Slayer, Link, Battle Beast, Guy and Smasher.
 
-Free-for-all with everyone: Link 71%, V 12%, Smasher 5%. Nobody beats the rest of the roster at once (solo is 0% for everyone; the crowd ends it in the first round).
+Free-for-all with everyone: Link 72%, V 11%, Smasher 4%. Nobody beats the rest of the roster at once (solo is 0% for everyone; the crowd ends it in the first round).
 
 ## Raid bosses
 
@@ -66,6 +69,12 @@ Above the ladder sits the raid tier: everything from past the god-killers up to 
 Sheets only: nothing here is run in the arena, because nothing on the ladder or in the raid tier is within two exponents of them.
 
 - **Frieza** (`Frieza_Cosmic.pdf`), every form from Planet Vegeta to Black Frieza. By power level: first through third form E3, final form E4 (60 and 120 million). By the on-page relations, where Super gives no numbers: Golden about E7 (even with Super Saiyan Blue Goku), Black about E11 (one strike each for Ultra Instinct Goku and Ultra Ego Vegeta). That's the feats reading; the Elder Kai's universe-shattering line, taken literally, would put Golden near E22 and Black near E26. The sheet shows the conversions in real numbers.
+
+## Stories
+
+`stories/` has fights from the arena written up as short stories, from both fighters' sides: [Might Guy vs Guts](stories/guy-vs-guts.md) and [Battle Beast vs Might Guy](stories/beast-vs-guy.md). Each one is a real run, the most dramatic of 400, with its round-by-round log at the top. To find the next one:
+
+    python stories/fight_log.py beast might-guy 400
 
 ## How the code is shaped
 

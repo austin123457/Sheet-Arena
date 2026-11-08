@@ -178,3 +178,16 @@ def test_exponents_convert_damage_between_tiers():
     assert p.take(150, "slashing", "Guts") == 1         # a BFG-sized hit: 1.5, rounded down
     assert p.take(9, "force", "Madara") == 9            # same exponent: ordinary 5e
     assert g.take(2, "force", "Piccolo") == 200         # a moon-unit 2 on a ladder body
+
+
+def test_massive_damage_kills_outright_but_a_fairy_still_answers_it():
+    g, l, y = make("guts"), make("link"), make("might-guy")
+    Fight([[y], [g, l]])
+    g.raging = True; g.hp = 10
+    g.take(600, "force", "Guy", ignore_res=True)       # 590 past 0 against 236 max: no Relentless Rage
+    assert g.out and not g.down
+    g2 = make("guts"); Fight([[y], [g2]]); g2.raging = True; g2.hp = 10
+    g2.take(40, "force", "Guy", ignore_res=True)        # 30 past 0: Relentless Rage gets its save
+    assert g2.down or g2.hp == 24
+    f = l.fairies; l.take(5000, "force", "Guy", ignore_res=True, ignore_imm=True)
+    assert l.alive() and l.fairies == f - 1 and l.hp == 90

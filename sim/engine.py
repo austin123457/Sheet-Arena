@@ -22,6 +22,8 @@ Hooks a fighter can override (all default to doing nothing):
   legendary_action  a raid boss's move at the end of someone else's turn (legendary_actions per round)
   negates_spells    True when spells and quickhacks simply don't take (Madara's Truth-Seeking Balls)
   seal              what a sealing technique does to you (Itachi's Totsuka): by default you're out
+  on_massive        a hit that leaves at least your maximum HP past 0 (5e's massive damage): by default you're dead,
+                    with no Relentless Rage or death saves; only a way back from death answers it (Link's fairies)
 
 Exponents. Every creature has an exponent (tier): E1 the ladder (city, mountain), E2 the moon, E3 a planet, E4 a
 star, E5 a galaxy, E6 a universe. Its physical stats, HP and damage are written in its own units, so two creatures of
@@ -152,8 +154,14 @@ class Combatant:
             # Hypnotic Pattern breaks on any damage; Dominate Person gets a new save; a genjutsu doesn't care
             c = self.charmed
             if c["mode"] == "pattern" or self.save("Wis", c["dc"], spell=True, kind="charm"): self.charmed = None
-        if self.hp <= 0: self.hp = 0; self.on_zero(src, crit)
+        if self.hp <= 0:
+            overflow = -self.hp; self.hp = 0
+            # massive damage (5e): what's left after 0 is at least your maximum, and you're killed outright:
+            # no Relentless Rage, no death saves, no 'if you aren't killed outright'
+            if overflow >= self.maxhp and not self.raid_boss: self.on_massive(src)
+            else: self.on_zero(src, crit)
         return dmg
+    def on_massive(self, src): self.out = True
     def immune(self, dtype): return False
     def modify_incoming(self, dmg, dtype, src, from_attack, melee, ignore_res): return dmg
     def after_damage(self, dmg, dtype, src, melee): pass
