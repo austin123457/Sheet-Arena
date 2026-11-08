@@ -72,7 +72,7 @@ Sheets only: nothing here is run in the arena, because nothing on the ladder or 
 
 ## Stories
 
-`stories/` has fights from the arena written up as short stories, from both fighters' sides: [Might Guy vs Guts](stories/guy-vs-guts.md), [Battle Beast vs Might Guy](stories/beast-vs-guy.md) and [Spike Spiegel vs Arthur Morgan](stories/spike-vs-arthur.md). Each one is a real run, the most dramatic of a few hundred (or, for an upset, of the fights the underdog won), with its round-by-round log at the top. To find the next one:
+`stories/` has fights from the arena written up as short stories, from every fighter's side: [Might Guy vs Guts](stories/guy-vs-guts.md), [Battle Beast vs Might Guy](stories/beast-vs-guy.md) , [Spike Spiegel vs Arthur Morgan](stories/spike-vs-arthur.md) and its sequel, [Spike and Arthur vs Adam Smasher](stories/spike-arthur-vs-smasher.md). Each one is a real run, the most dramatic of a few hundred (or, for an upset, of the fights the underdog won), with its round-by-round log at the top. To find the next one:
 
     python stories/fight_log.py beast might-guy 400
 

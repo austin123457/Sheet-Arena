@@ -3,6 +3,7 @@ the raw material for the stories in this folder.
 
     python stories/fight_log.py beast might-guy 400
     python stories/fight_log.py spike arthur 2000 Spike     # only fights Spike won
+    python stories/fight_log.py spike+arthur smasher 400     # teams: join names with +
 
 "Dramatic" scores long fights, Relentless Rage-style comebacks, Night Guy, and a winner left low.
 It wraps the engine's attack() and take() to record them; the fights themselves are the arena's own."""
@@ -31,65 +32,66 @@ def logged_take(self, dmg, dtype, src, **kw):
     return r
 E.Combatant.take = logged_take
 
+# resources and conditions worth narrating: a change in any of them shows up in the log
+WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone",
+         "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix")
+
+
 def run_one(a, b):
     LOG.clear()
-    x, y = make(a), make(b)
-    f = Fight([[x], [y]], verbose=True)
+    A, B = [make(k) for k in a.split("+")], [make(k) for k in b.split("+")]
+    everyone = A + B
+    f = Fight([A, B], verbose=True)
     turns = []
-    for c in (x, y):
-        ot, oz = c.turn, c.on_zero
+    def snap(): return [{k: getattr(c, k) for k in WATCH if hasattr(c, k)} for c in everyone]
+    for c in everyone:
+        ot, oz, om = c.turn, c.on_zero, c.on_massive
         def wrapped(fight, c=c, ot=ot):
-            start = len(LOG)
-            before = dict(gate=getattr(c, "gate", None), raging=getattr(c, "raging", None), hp=c.hp, down=getattr(c, "down", None), fr=[e.frightened for e in (x, y)], st=snap((x, y)))
+            start, before = len(LOG), snap()
             ot(fight)
-            after = dict(gate=getattr(c, "gate", None), raging=getattr(c, "raging", None), hp=c.hp, down=getattr(c, "down", None), fr=[e.frightened for e in (x, y)], st=snap((x, y)))
-            turns.append((fight.round, c.name, before, after, LOG[start:], x.hp, y.hp))
+            turns.append((fight.round, c.name, before, snap(), LOG[start:], [(e.name, e.hp + e.thp) for e in everyone]))
         c.turn = wrapped
         def zero(src, crit, c=c, oz=oz):
             LOG.append(("zero", c.name, src))
             oz(src, crit)
             LOG.append(("after_zero", c.name, c.hp, c.out, getattr(c, "down", None)))
         c.on_zero = zero
-        om = c.on_massive
         def massive(src, c=c, om=om):
             LOG.append(("massive", c.name, src))
             om(src)
         c.on_massive = massive
     w, r = f.run()
-    return w, r, turns, (x, y)
+    return w, r, turns, (A, B)
+
 
 a, b = sys.argv[1], sys.argv[2]
 n = int(sys.argv[3]) if len(sys.argv) > 3 else 400
-want = sys.argv[4] if len(sys.argv) > 4 else None
-# resources and conditions worth narrating: a change in any of them shows up in the log
-WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone", "hades", "fairies", "second_heart")
-def snap(cs): return [{k: getattr(c, k) for k in WATCH if hasattr(c, k)} for c in cs]
+want = sys.argv[4] if len(sys.argv) > 4 else None      # a fighter's name: keep only fights their side won
+team = len(a.split("+")) + len(b.split("+")) > 2
 best = None
 for i in range(n):
-    w, r, turns, (x, y) = run_one(a, b)
-    if want and (w is None or [x, y][w].name != want): continue
+    w, r, turns, (A, B) = run_one(a, b)
+    if want and (w is None or want not in [c.name for c in (A, B)[w]]): continue
     night = any(e[0] == "dmg" and e[1] == "Night Guy" for t in turns for e in t[4])
     relentless = sum(1 for t in turns for e in t[4] if e[0] == "after_zero" and not e[3])
-    close = 0 if w is None else -[x, y][w].hp / 20
-    score = r + 6 * night + 4 * relentless + close + random.random()
+    fallen = 0 if w is None else sum(c.out for c in (A, B)[w])        # a winner who lost someone on the way
+    close = 0 if w is None else -sum(c.hp for c in (A, B)[w]) / 20
+    score = r + 6 * night + 4 * relentless + 5 * fallen + close + random.random()
     if best is None or score > best[0]:
-        best = (score, w, r, turns, x.name, y.name)
+        best = (score, w, r, turns, (A, B))
 if best is None: sys.exit(f"no fight in {n} went to {want}")
-score, w, r, turns, xn, yn = best
-print(f"winner: {[xn, yn][w] if w is not None else 'draw'} in {r} rounds")
-for rnd, name, before, after, events, hx, hy in turns:
+score, w, r, turns, (A, B) = best
+names = [c.name for c in A + B]
+print(f"winner: {' + '.join(c.name for c in (A, B)[w]) if w is not None else 'draw'} in {r} rounds")
+for rnd, name, before, after, events, hps in turns:
     bits = []
-    if before["gate"] != after["gate"] and after["gate"] is not None: bits.append(f"gates {before['gate']}->{after['gate']}")
-    if before["raging"] != after["raging"]: bits.append("RAGE")
-    for who, b0, b1 in zip((xn, yn), before['fr'], after['fr']):
-        if b0 != b1: bits.append(f"<{who} {'FRIGHTENED' if b1 else 'no longer frightened'}>")
-    for who, s0, s1 in zip((xn, yn), before['st'], after['st']):
+    for who, s0, s1 in zip(names, before, after):
         ch = [f"{k} {s0[k]}->{s1[k]}" for k in s0 if s0[k] != s1[k]]
         if ch: bits.append(f"{{{who}: {', '.join(ch)}}}")
     for e in events:
         if e[0] == "atk":
             _, at, tg, dt, hit, crit, dealt, thp = e
-            bits.append(f"{'CRIT' if crit else 'hit' if hit else 'miss'}{'' if not hit else f' {dealt} {dt}'}")
+            bits.append(f"{'CRIT' if crit else 'hit' if hit else 'miss'}{'' if not hit else f' {dealt} {dt}'}{f' >{tg}' if team else ''}{f' ({at})' if team and at != name else ''}")
         elif e[0] == "dmg":
             bits.append(f"[{e[1]} -> {e[2]}: {e[4]} {e[3]}]")
         elif e[0] == "massive":
@@ -98,4 +100,4 @@ for rnd, name, before, after, events, hx, hy in turns:
             bits.append(f"<{e[1]} DROPS TO 0>")
         elif e[0] == "after_zero":
             bits.append(f"<{e[1]} {'OUT' if e[3] else ('DOWN' if e[4] else f'back up at {e[2]}')}>")
-    print(f"R{rnd} {name:5s} | {' '.join(bits)}  || {xn} {hx}  {yn} {hy}")
+    print(f"R{rnd} {name:7s} | {' '.join(bits)}  || " + "  ".join(f"{n_} {h}" for n_, h in hps))
