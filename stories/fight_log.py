@@ -34,7 +34,8 @@ E.Combatant.take = logged_take
 
 # resources and conditions worth narrating: a change in any of them shows up in the log
 WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone",
-         "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix")
+         "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix",
+         "nayru", "red", "blue", "last_stand", "iron_n")
 
 
 def run_one(a, b):
