@@ -44,6 +44,9 @@ def run_one(a, b):
     A, B = [make(k) for k in a.split("+")], [make(k) for k in b.split("+")]
     everyone = A + B
     f = Fight([A, B], verbose=True)
+    on = f.note
+    def note(text, on=on): LOG.append(("note", text)); on(text)
+    f.note = note
     turns = []
     def snap(): return [{k: getattr(c, k) for k in WATCH if hasattr(c, k)} for c in everyone]
     for c in everyone:
@@ -96,6 +99,8 @@ for rnd, name, before, after, events, hps in turns:
             bits.append(f"{'CRIT' if crit else 'hit' if hit else 'miss'}{'' if not hit else f' {dealt} {dt}'}{f' >{tg}' if team else ''}{f' ({at})' if team and at != name else ''}")
         elif e[0] == "dmg":
             bits.append(f"[{e[1]} -> {e[2]}: {e[4]} {e[3]}]")
+        elif e[0] == "note":
+            bits.append(f"** {e[1]} **")
         elif e[0] == "massive":
             bits.append(f"<{e[1]} KILLED OUTRIGHT by {e[2]}>")
         elif e[0] == "zero":

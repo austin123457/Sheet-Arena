@@ -86,11 +86,14 @@ class Kratos(Combatant):
         return hit
 
     def tear_heart(self, fight, tgt):
-        """Anderson's own sheet: grappled at 0, a Strength contest, and his heart comes out."""
+        """Anderson's own sheet: grappled at 0, a Strength contest, and his heart comes out. The grapple is one
+        attack of the Attack action (2024), against a body that can't resist; the other two go into the contest."""
+        tries = 3
         if self.grappling is not tgt:
-            self.grappling = tgt; return                         # the grapple, against a body that can't resist
-        if d20(adv=self.raging) + 14 >= d20() + 9:
-            tgt.out = True; fight.note("Kratos tears out Anderson's heart")
+            self.grappling = tgt; tries -= 1
+        for _ in range(tries):
+            if d20(adv=self.raging) + 14 >= d20() + 9:
+                tgt.out = True; fight.note("Kratos tears out Anderson's heart"); return
 
     def turn(self, fight):
         tgt = fight.pick_target(self)
