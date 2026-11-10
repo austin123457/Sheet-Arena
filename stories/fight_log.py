@@ -36,7 +36,7 @@ E.Combatant.take = logged_take
 WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone",
          "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix",
          "nayru", "red", "blue", "last_stand", "iron_n", "bfg", "crucible", "blood", "hammer", "rbd", "legacy", "runic", "valor",
-         "haste", "nail", "times_down", "down", "hold_used", "death_fail")
+         "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut")
 
 
 def run_one(a, b):

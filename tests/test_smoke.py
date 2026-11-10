@@ -134,6 +134,26 @@ def test_kratos_can_finish_a_downed_anderson_the_way_his_sheet_allows():
     assert a.out
 
 
+def test_musashis_short_sword_guards_against_a_blade_and_not_a_bullet():
+    m, a = make("musashi"), make("arthur")
+    Fight([[m], [a]]); m.reaction = False
+    assert m.defend_ac(a, 21, True, False) == 6 and m.defend_ac(a, 21, False, False) == 0
+
+
+def test_holding_down_the_pillow_stops_a_blow_only_when_his_cut_lands():
+    m, g = make("musashi"), make("gs")
+    f = Fight([[m], [g]]); f.actor = g; m.one_cut = False
+    stopped = 0
+    for _ in range(200):
+        m.reaction = True; g.hp = g.maxhp
+        r = m.defend_ac(g, 30, True, False)
+        assert not m.reaction and r in (None, 6)
+        stopped += r is None
+    assert 0 < stopped < 200
+    m.reaction = True
+    assert m.defend_ac(g, 30, True, True) == 6 and m.reaction      # a critical hit can't be stopped
+
+
 def test_madara_phase_one_cant_be_killed_only_sealed():
     m = make("madara"); f = Fight([[m], [make("itachi")]])
     m.take(5000, "force", "test")
