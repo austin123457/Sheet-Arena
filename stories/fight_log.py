@@ -8,7 +8,8 @@ the raw material for the stories in this folder.
 "Dramatic" scores long fights, Relentless Rage-style comebacks, Night Guy, and a winner left low.
 It wraps the engine's attack() and take() to record them; the fights themselves are the arena's own.
 A Reaction queued with fight.after_turn (a Riposte, Dark Link's Answer) lands once the turn is over:
-it's printed on the turn that drew it, after "then:"."""
+it's printed on the turn that drew it, after "then:". Anything that happens before the first turn (Jin's
+Standoff) is printed as R0, under the name of whoever attacked."""
 import os, sys, random
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import sim.engine as E
@@ -38,7 +39,8 @@ E.Combatant.take = logged_take
 WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone",
          "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix",
          "nayru", "red", "blue", "last_stand", "iron_n", "bfg", "crucible", "blood", "hammer", "rbd", "legacy", "runic", "valor",
-         "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut", "nuts", "triforce", "clanks", "translucent")
+         "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut", "nuts", "triforce", "clanks", "translucent",
+         "resolve", "fs", "recover")
 
 
 def run_one(a, b):
@@ -52,7 +54,10 @@ def run_one(a, b):
     turns = []; seen = [0]
     def snap(): return [{k: getattr(c, k) for k in WATCH if hasattr(c, k)} for c in everyone]
     def late():        # whatever happened since the last turn ended belongs to that turn
-        if turns and len(LOG) > seen[0]:
+        if not turns and LOG:       # before anyone's first turn: the Standoff
+            s = snap(); who = next((e[1] for e in LOG if e[0] == "atk"), "start")
+            turns.append((0, who, s, s, LOG[:], [(e.name, e.hp + e.thp) for e in everyone]))
+        elif turns and len(LOG) > seen[0]:
             rnd, name, before, _, events, _ = turns[-1]
             turns[-1] = (rnd, name, before, snap(), events + [("then",)] + LOG[seen[0]:], [(e.name, e.hp + e.thp) for e in everyone])
         seen[0] = len(LOG)
