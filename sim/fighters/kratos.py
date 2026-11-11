@@ -19,6 +19,7 @@ from ..engine import Combatant, attack, d, d20, roll
 class Kratos(Combatant):
     name = "Kratos"; danger = 7; melee = True
     fright_immune = True
+    one_handed = property(lambda self: not self.blades)     # the Axe, not the Blades on their chains
 
     def __init__(self):
         super().__init__()
@@ -48,7 +49,7 @@ class Kratos(Combatant):
     def on_massive(self, src): self.on_zero(src, False)      # he was dead every time he climbed out
 
     def before_first_round(self, fight):
-        self.blades = any(hasattr(e, "radiant_taken") for e in fight.enemies(self))   # something that grows back
+        self.blades = any(hasattr(e, "radiant_taken") or e.mirrors for e in fight.enemies(self))   # something that grows back, or a mirror
 
     def element(self): return "fire" if self.blades else "cold"
 

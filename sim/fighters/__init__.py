@@ -19,5 +19,6 @@ from .kratos import Kratos
 from .madara import Madara
 from .piccolo import Piccolo
 from .musashi import Musashi
+from .dark_link import DarkLink
 
-ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Musashi, Madara, Piccolo]
+ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Musashi, DarkLink, Madara, Piccolo]

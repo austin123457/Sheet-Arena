@@ -32,6 +32,7 @@ PREFERS = {"Beast": "deck", "Jin": "deck", "Itachi": "deck"}
 class V(Combatant):
     name = "V"; danger = 6; melee = True
     evasion = True
+    one_handed = property(lambda self: not self.scalpel)    # a Mantis Blade, not the katana in both hands
     forced = None           # "sandy" or "deck" to skip his own choice
 
     def __init__(self):
@@ -49,12 +50,12 @@ class V(Combatant):
         es = fight.enemies(self)
         if self.os is None:
             self.os = PREFERS.get(max(es, key=lambda e: e.danger).name, "sandy") if es else "sandy"
-        self.scalpel = any(e.name == "Smasher" for e in es)          # electricity shorts him out
+        self.scalpel = any(e.name == "Smasher" or e.mirrors for e in es)    # electricity shorts him out; a mirror can't copy two hands
 
     def ac_now(self): return self.ac + (2 if self.sandy > 0 else 0)
     def save_adv(self, ab, spell): return ab == "Dex" and self.sandy > 0
 
-    def incoming_attack(self, attacker, bonus, adv, dis):
+    def incoming_attack(self, attacker, bonus, adv, dis, melee=True):
         if self.sandy > 0 or self.tuned: dis = True           # the world at 15% speed
         return adv, dis
 

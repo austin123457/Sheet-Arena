@@ -154,6 +154,70 @@ def test_holding_down_the_pillow_stops_a_blow_only_when_his_cut_lands():
     assert m.defend_ac(g, 30, True, True) == 6 and m.reaction      # a critical hit can't be stopped
 
 
+def test_dark_link_mirrors_a_sword_in_one_hand_and_nothing_else():
+    s, l, g, a = make("dark-link"), make("link"), make("guts"), make("arthur")
+    f = Fight([[s], [l, g, a]]); f.round = 1; f.actor = l
+    met = 0
+    for _ in range(200):
+        s.clanks = 0; s.reaction = False
+        s.incoming_attack(l, 18, False, False, True)
+        met += s.defend_ac(l, 20, True, False) is None          # a 2 on the hero's die: the shadow needs a 2
+        s.incoming_attack(g, 14, False, False, True)
+        assert s.defend_ac(g, 34, True, False) == 0             # the Dragonslayer takes both hands
+        assert s.defend_ac(a, 34, False, False) == 0            # and a bullet isn't a swing
+    assert 150 < met < 200
+    s.prone = True
+    assert s.defend_ac(l, 20, True, False) == 0
+
+
+def test_dark_link_staggers_on_the_sixth_clank():
+    s, l = make("dark-link"), make("link")
+    f = Fight([[s], [l]]); f.round = 1; f.actor = l; s.reaction = False
+    while s.staggered is None:
+        s.incoming_attack(l, 18, False, False, True); s.defend_ac(l, 20, True, False)
+    assert s.is_staggered() and s.clanks == 0
+    assert s.incoming_attack(l, 18, False, False, True) == (True, False)
+    assert s.defend_ac(l, 20, True, False) == 0
+    f.round = 2
+    assert not s.is_staggered()
+
+
+def test_dark_link_sinks_under_the_second_swing_of_a_turn():
+    s, g = make("dark-link"), make("guts")
+    f = Fight([[s], [g]]); f.round = 1; f.actor = g; s.reaction = False
+    assert s.incoming_attack(g, 14, False, False, True) == (False, False)
+    s.take(20, "slashing", "Guts", from_attack=True, melee=True)
+    assert s.incoming_attack(g, 14, False, False, True) == (False, True) and "Guts" in s.behind
+    s.paralyzed = True; s.sunk = None                           # a Deku Nut: it can't sink while it can't move
+    s.take(20, "slashing", "Guts", from_attack=True, melee=True)
+    assert s.sunk is None
+
+
+def test_dark_link_never_attacks_while_translucent():
+    s, g = make("dark-link-room"), make("gs")
+    f = Fight([[s], [g]]); f.round = 1; f.actor = s
+    s.turn(f)
+    assert s.translucent == 9 and g.hp == g.maxhp and s.surges == 2
+    s.on_missed(f, g, True)
+    assert s.reaction and not f.pending
+
+
+def test_the_shadow_is_evil_has_no_pack_and_rolls_from_arrows():
+    s, a = make("dark-link"), make("arthur")
+    Fight([[s], [a]])
+    assert s.evil and not s.humanoid and s.maxhp == make("link").maxhp
+    assert not hasattr(s, "fairies") and not hasattr(s, "magic") and not hasattr(s, "sw")
+    assert s.incoming_attack(a, 12, False, False, False) == (False, True)
+    assert s.save_adv("Dex", False) and not s.save_adv("Dex", True)
+
+
+def test_a_mirror_makes_kratos_and_v_change_weapons():
+    k, v, s = make("kratos"), make("v"), make("dark-link")
+    f = Fight([[s], [k, v]])
+    k.before_first_round(f); v.before_first_round(f)
+    assert k.blades and v.scalpel and not k.one_handed and not v.one_handed
+
+
 def test_madara_phase_one_cant_be_killed_only_sealed():
     m = make("madara"); f = Fight([[m], [make("itachi")]])
     m.take(5000, "force", "test")

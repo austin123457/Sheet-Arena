@@ -17,6 +17,7 @@ from ..engine import Combatant, attack, d, d20, roll
 
 class Crane(Combatant):
     name = "Crane"; danger = 4; melee = True
+    one_handed = property(lambda self: not self.beast)      # the machete, not the claws
 
     def __init__(self):
         super().__init__()

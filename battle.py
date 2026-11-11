@@ -16,7 +16,7 @@ from sim.engine import ROUND_CAP
 from sim.roster import make, NAMES, Fight, Counter
 
 RAID = ["madara", "piccolo"]          # raid bosses: off the ladder, built to fight a party
-ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs", "talion", "v", "kratos", "musashi"]
+ROSTER = ["slayer", "link", "anderson", "guy", "smasher", "beast", "jin", "guts", "itachi", "crane", "arthur", "spike", "gs", "talion", "v", "kratos", "musashi", "dark-link"]
 
 def run(teams, n):
     wins = Counter(); rounds = 0; draws = 0

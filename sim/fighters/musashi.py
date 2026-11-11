@@ -26,7 +26,7 @@ DC = 19
 
 class Musashi(Combatant):
     name = "Musashi"; danger = 4; melee = True
-    fright_immune = True
+    fright_immune = True; one_handed = True
 
     def __init__(self):
         super().__init__()
@@ -56,7 +56,7 @@ class Musashi(Combatant):
     def rhythm(self): return self.fight is not None and self.fight.round >= 3
 
     # ---------- attacks against him ----------
-    def incoming_attack(self, attacker, bonus, adv, dis):
+    def incoming_attack(self, attacker, bonus, adv, dis, melee=True):
         if id(attacker) in self.slashed: dis = True
         if self.rhythm() and not self.incapacitated():
             key = (id(attacker), self.fight.round, id(self.fight.actor))

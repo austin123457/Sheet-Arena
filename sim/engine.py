@@ -5,10 +5,10 @@ else's attack, save or turn goes through one of the hooks on Combatant; nothing
 patches this file from outside.
 
 Hooks a fighter can override (all default to doing nothing):
-  incoming_attack   adjust adv/dis on an attack aimed at you (Spike's Lucky, the Gates' disadvantage)
+  incoming_attack   adjust adv/dis on an attack aimed at you (Spike's Lucky, the Gates' disadvantage, Dark Link's roll)
   attack_advantage  advantage on your own attack against this target (Smasher's Studied Attacks)
   natural_bonus     extra damage for a given natural roll (Smasher's nat-20 kicker)
-  defend_ac         reaction on an incoming attack: AC bonus, or None to negate it
+  defend_ac         reaction on an incoming attack: AC bonus, or None to negate it (Dark Link's Mirror)
   reduce_hit        flat reduction on a hit after it lands
   immune            take nothing at all (Nayru's Love), unless the source ignores immunity
   shrug_off_save    turn a failed save into a success (Smasher's Mage Slayer)
@@ -84,6 +84,8 @@ class Combatant:
     retaliates = False              # Fight.run calls retaliate() after an enemy's turn that hit you in melee
     susanoo = False                 # Itachi's ribcage is up: no prone, no topple
     humanoid = True                 # Hold Person and Dominate Person need it
+    one_handed = False              # swings a melee weapon in one hand: Dark Link can make the same swing
+    mirrors = False                 # Dark Link: anyone with a weapon he can't mirror takes it
     summon = False                  # a clone or a conjured creature: see Fight.over()
     raid_boss = False
     tier = 1                        # the exponent: 1 the ladder, 2 the moon (the raid tier), 3 a planet...
@@ -178,7 +180,7 @@ class Combatant:
         return len(self.struck_on.get(attacker, ()))
 
     # ---------- attacks against you ----------
-    def incoming_attack(self, attacker, bonus, adv, dis): return adv, dis
+    def incoming_attack(self, attacker, bonus, adv, dis, melee=True): return adv, dis
     def defend_ac(self, attacker, total, melee, crit): return 0
     def reduce_hit(self, dmg, melee): return dmg
     def on_targeted_by_spell(self, fight, caster): pass
@@ -227,7 +229,7 @@ def amaterasu(tgt, dmg):
 def attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, adv=False, dis=False, crit_range=20,
            sneak=0, extra=None, ignore_res=False, ignore_imm=False):
     """One attack roll. Returns (hit, crit, damage dealt)."""
-    adv, dis = tgt.incoming_attack(att, bonus, adv, dis)
+    adv, dis = tgt.incoming_attack(att, bonus, adv, dis, melee)
     if tgt.out: return (False, False, 0)
     gap = att.tier - tgt.tier
     if gap <= -2: return (False, False, 0)        # two exponents up: it can't be touched

@@ -26,6 +26,7 @@ WRAITH_DC = 16
 
 class Talion(Combatant):
     name = "Talion"; danger = 4; melee = True
+    one_handed = True
 
     def __init__(self):
         super().__init__()

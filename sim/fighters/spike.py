@@ -22,7 +22,7 @@ class Spike(Combatant):
         if not ok and self.luck > 0: self.luck -= 1; ok = d20(adv=True) + self.saves[ab] >= dc
         return ok
 
-    def incoming_attack(self, attacker, bonus, adv, dis):
+    def incoming_attack(self, attacker, bonus, adv, dis, melee=True):
         # Lucky: if a straight roll would hit, spend a point to give the attack disadvantage
         if self.luck > 0 and not dis:
             nat = d20(adv=adv)

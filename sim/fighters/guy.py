@@ -26,7 +26,7 @@ class Guy(Combatant):
             self.focus -= 1; ok = d20(adv=(ab == "Str" and self.gate >= 1)) + self.saves[ab] >= dc
         return ok
 
-    def incoming_attack(self, attacker, bonus, adv, dis):
+    def incoming_attack(self, attacker, bonus, adv, dis, melee=True):
         if self.gate >= 7: dis = True          # the Seventh Gate: attacks against him have disadvantage
         return adv, dis
 

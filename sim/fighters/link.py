@@ -7,7 +7,7 @@ from ..engine import Combatant, attack, d, roll
 
 class Link(Combatant):
     name = "Link"; danger = 5; melee = True
-    fright_immune = True
+    fright_immune = True; one_handed = True
 
     def __init__(self):
         super().__init__()

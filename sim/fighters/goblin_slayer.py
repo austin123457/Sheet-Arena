@@ -5,6 +5,7 @@ from ..engine import Combatant, attack, d, roll
 
 class GoblinSlayer(Combatant):
     name = "GS"; danger = 1; melee = True
+    one_handed = True
 
     def __init__(self):
         super().__init__()
