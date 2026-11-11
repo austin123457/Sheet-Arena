@@ -40,7 +40,8 @@ WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "s
          "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix",
          "nayru", "red", "blue", "last_stand", "iron_n", "bfg", "crucible", "blood", "hammer", "rbd", "legacy", "runic", "valor",
          "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut", "nuts", "triforce", "clanks", "translucent",
-         "resolve", "fs", "recover")
+         "resolve", "fs", "recover",
+         "decoys", "invisible", "items", "stored", "shield_up", "flash", "fate")
 
 
 def run_one(a, b):

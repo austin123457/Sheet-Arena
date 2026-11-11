@@ -288,3 +288,35 @@ def test_massive_damage_kills_outright_but_a_fairy_still_answers_it():
     k, v = make("kratos"), make("v-sandy"); Fight([[y], [k, v]])
     k.take(9000, "force", "Guy", ignore_res=True); v.take(9000, "force", "Guy", ignore_res=True)
     assert k.alive() and k.hp == 1 and not v.alive()   # out of Hades; a second heart doesn't help
+
+
+def test_jack_cheats_death_once_for_each_thing_he_built():
+    j = make("jack"); Fight([[j], [make("arthur")]])
+    for n in range(6):
+        j.thp = 0; j.take(j.hp, "piercing", "test")
+        assert j.alive() and j.hp == 20 and len(j.items) == 5 - n
+    assert j.ac == 13 and j.atk() == 11 and j.saves["Con"] == 8      # the bracers, the ring, the cloak and the laser are gone
+    j.take(20, "piercing", "test")
+    assert not j.alive()
+
+
+def test_a_digi_jack_takes_the_hit_and_one_comes_back_each_turn():
+    j, a = make("jack"), make("arthur"); f = Fight([[j], [a]])
+    j.before_first_round(f)
+    assert j.decoys == 2
+    j.reaction = False; j.fate = False                              # no Shield, no Boon of Fate: only the decoys
+    seen = [j.defend_ac(a, 30, False, False) for i in range(40)]
+    assert seen.count(None) == 2 and j.decoys == 0                  # two pop, and after that it's him
+    j.start_turn()
+    assert j.decoys == 1
+    j.assets = 1; j.end_turn(f)
+    assert j.decoys == 0                                            # the minute runs out
+
+
+def test_jack_cloaks_when_the_other_one_drew_first():
+    j, g = make("jack"), make("guts"); f = Fight([[j], [g]]); f.round = 1
+    assert not j.wants_cloak(f, g)
+    g.acted = True
+    assert j.wants_cloak(f, g) and j.wants_cloak(f, make("arthur"))
+    f.round = 2
+    assert not j.wants_cloak(f, g)
