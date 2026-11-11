@@ -58,6 +58,7 @@ class Jack(Combatant):
     def incoming_attack(self, attacker, bonus, adv, dis, melee=True):
         if self.luck > 0 and not dis and not self.invisible and (adv or self.hp <= self.maxhp // 2):
             self.luck -= 1; dis = True                      # Lucky
+            if self.fight: self.fight.note("Jack's luck")
         return adv, dis
 
     def defend_ac(self, attacker, total, melee, crit):
@@ -71,9 +72,14 @@ class Jack(Combatant):
         margin = total - self.ac_now()
         if not self.shield_up and self.reaction and margin < 5 and not self.incapacitated():
             lvl = next((l for l in (1, 2, 3) if self.slots[l]), None)
-            if lvl: self.slots[lvl] -= 1; self.reaction = False; self.shield_up = True; return 0       # Shield
+            if lvl:                                         # Shield
+                self.slots[lvl] -= 1; self.reaction = False; self.shield_up = True
+                if self.fight: self.fight.note("Jack's Shield")
+                return 0
         if self.fate and margin < 4:
-            self.fate = False; return roll(2, 4)            # Boon of Fate
+            self.fate = False                               # Boon of Fate
+            if self.fight: self.fight.note("Boon of Fate")
+            return roll(2, 4)
         return 0
 
     def save(self, ab, dc, spell=False, kind=None, adv=False):
@@ -91,7 +97,9 @@ class Jack(Combatant):
         if self.invisible and self.hp > 0:                  # concentration on the cloak
             if d(20) + self.saves["Con"] < max(10, dmg // 2):
                 if self.sharp > 0 and self.reaction and "Mind Sharpener" in self.items: self.sharp -= 1; self.reaction = False
-                else: self.invisible = False
+                else:
+                    self.invisible = False
+                    if self.fight: self.fight.note("the cloak drops")
 
     def on_zero(self, src, crit):
         if not self.items: self.out = True; return
@@ -127,7 +135,9 @@ class Jack(Combatant):
         """One bonus action for both. They aren't him: the cloak stays shut and gives them nothing."""
         cloak, self.invisible = self.invisible, False
         n = 2
-        if self.thp < 7: self.thp = max(self.thp, roll(2, 8) + 5); n = 1          # Protector
+        if self.thp < 7:                                    # Protector
+            self.thp = max(self.thp, roll(2, 8) + 5); n = 1
+            fight.note(f"a cannon puts Jack's shield back: {self.thp}")
         for i in range(n):
             if not tgt or not tgt.alive(): tgt = fight.pick_target(self)
             if not tgt: break
@@ -149,6 +159,7 @@ class Jack(Combatant):
         high = next((l for l in (5, 4) if self.slots[l]), None)
         if not self.invisible and self.stored > 0 and self.wants_cloak(fight, tgt):
             self.stored -= 1; self.invisible = True         # the Spell-Storing Item: Invisibility
+            fight.note("Jack cloaks")
         elif high and len(es) >= 2:
             if self.spell(fight, tgt, high):                # Fireball into the crowd
                 first = [True]

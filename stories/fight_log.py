@@ -17,10 +17,12 @@ from sim.roster import make, Fight
 import importlib, pkgutil, sim.fighters
 MODS = [importlib.import_module('sim.fighters.' + m.name) for m in pkgutil.iter_modules(sim.fighters.__path__)]
 
-LOG = []
+LOG = []; DEPTH = [0]
 orig_attack = E.attack
 def logged_attack(fight, att, tgt, bonus, dmg_fn, dtype, melee=True, **kw):
-    res = orig_attack(fight, att, tgt, bonus, dmg_fn, dtype, melee, **kw)
+    DEPTH[0] += 1
+    try: res = orig_attack(fight, att, tgt, bonus, dmg_fn, dtype, melee, **kw)
+    finally: DEPTH[0] -= 1
     hit, crit, dealt = res
     LOG.append(("atk", att.name, tgt.name, dtype, hit, crit, dealt, tgt.hp))
     return res
@@ -30,7 +32,7 @@ for m in [E] + MODS:
 orig_take = E.Combatant.take
 def logged_take(self, dmg, dtype, src, **kw):
     r = orig_take(self, dmg, dtype, src, **kw)
-    if not kw.get("from_attack"):
+    if not kw.get("from_attack") or not DEPTH[0]:      # a hit dealt outside an attack roll (Peerless Aim) is logged too
         LOG.append(("dmg", src, self.name, dtype, r, self.hp))
     return r
 E.Combatant.take = logged_take
