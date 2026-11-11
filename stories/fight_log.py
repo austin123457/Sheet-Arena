@@ -6,7 +6,9 @@ the raw material for the stories in this folder.
     python stories/fight_log.py spike+arthur smasher 400     # teams: join names with +
 
 "Dramatic" scores long fights, Relentless Rage-style comebacks, Night Guy, and a winner left low.
-It wraps the engine's attack() and take() to record them; the fights themselves are the arena's own."""
+It wraps the engine's attack() and take() to record them; the fights themselves are the arena's own.
+A Reaction queued with fight.after_turn (a Riposte, Dark Link's Answer) lands once the turn is over:
+it's printed on the turn that drew it, after "then:"."""
 import os, sys, random
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import sim.engine as E
@@ -36,7 +38,7 @@ E.Combatant.take = logged_take
 WATCH = ("luck", "nine", "deadeye", "boxes", "sw", "wob", "snake", "miracle", "surges", "paralyzed", "prone",
          "hades", "fairies", "second_heart", "frightened", "raging", "gate", "sandy", "shorted", "matrix",
          "nayru", "red", "blue", "last_stand", "iron_n", "bfg", "crucible", "blood", "hammer", "rbd", "legacy", "runic", "valor",
-         "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut")
+         "haste", "nail", "times_down", "down", "hold_used", "death_fail", "dice", "one_cut", "nuts", "triforce", "clanks", "translucent")
 
 
 def run_one(a, b):
@@ -47,14 +49,21 @@ def run_one(a, b):
     on = f.note
     def note(text, on=on): LOG.append(("note", text)); on(text)
     f.note = note
-    turns = []
+    turns = []; seen = [0]
     def snap(): return [{k: getattr(c, k) for k in WATCH if hasattr(c, k)} for c in everyone]
+    def late():        # whatever happened since the last turn ended belongs to that turn
+        if turns and len(LOG) > seen[0]:
+            rnd, name, before, _, events, _ = turns[-1]
+            turns[-1] = (rnd, name, before, snap(), events + [("then",)] + LOG[seen[0]:], [(e.name, e.hp + e.thp) for e in everyone])
+        seen[0] = len(LOG)
     for c in everyone:
         ot, oz, om = c.turn, c.on_zero, c.on_massive
         def wrapped(fight, c=c, ot=ot):
+            late()
             start, before = len(LOG), snap()
             ot(fight)
             turns.append((fight.round, c.name, before, snap(), LOG[start:], [(e.name, e.hp + e.thp) for e in everyone]))
+            seen[0] = len(LOG)
         c.turn = wrapped
         def zero(src, crit, c=c, oz=oz):
             LOG.append(("zero", c.name, src))
@@ -66,6 +75,7 @@ def run_one(a, b):
             om(src)
         c.on_massive = massive
     w, r = f.run()
+    late()
     return w, r, turns, (A, B)
 
 
@@ -101,6 +111,8 @@ for rnd, name, before, after, events, hps in turns:
             bits.append(f"[{e[1]} -> {e[2]}: {e[4]} {e[3]}]")
         elif e[0] == "note":
             bits.append(f"** {e[1]} **")
+        elif e[0] == "then":
+            bits.append("then:")
         elif e[0] == "massive":
             bits.append(f"<{e[1]} KILLED OUTRIGHT by {e[2]}>")
         elif e[0] == "zero":

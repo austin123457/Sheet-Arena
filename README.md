@@ -13,6 +13,7 @@ Eighteen fighters, one sheet each: Goblin Slayer, Guts, Kyle Crane, Itachi Uchih
     python battle.py solo link                # Link vs everyone at once
     python battle.py 1v1 v smasher            # V picks his OS; v-sandy / v-deck force it
     python battle.py 1v1 link dark-link-room  # the shadow in its own room, translucent for the first minute
+    python battle.py 1v1 link-no-nayru dark-link   # an exhibition rule: Nayru's Love stays in the pack
     python battle.py list
 
 Dice come from the OS (`secrets`), nothing is seeded, and a fight caps at 40 rounds and counts as a draw.
@@ -77,7 +78,7 @@ Sheets only: nothing here is run in the arena, because nothing on the ladder or 
 
 ## Stories
 
-`stories/` has fights from the arena written up as short stories, from every fighter's side: [Might Guy vs Guts](stories/guy-vs-guts.md), [Battle Beast vs Might Guy](stories/beast-vs-guy.md) , [Spike Spiegel vs Arthur Morgan](stories/spike-vs-arthur.md) its sequel, [Spike and Arthur vs Adam Smasher](stories/spike-arthur-vs-smasher.md), [Goblin Slayer vs Talion](stories/gs-vs-talion.md), [Link vs Jin Sakai](stories/link-vs-jin.md), [Kratos vs the Doom Slayer](stories/kratos-vs-slayer.md), [Alexander Anderson vs Guts](stories/anderson-vs-guts.md), two intermissions with no fight in them, [The Regulars](stories/intermission-the-regulars.md) and [Full House](stories/intermission-full-house.md), the first bout off the bartender's chalkboard, [Alexander Anderson vs Kratos](stories/anderson-vs-kratos.md), and the Slayer's return, [Adam Smasher vs the Doom Slayer](stories/smasher-vs-slayer.md). They share a continuity: a bar between worlds, where the old bartender pours what you need before you ask, and nobody who falls stays down for good. They wake up back at the counter. Each one is a real run, the most dramatic of a few hundred (or, for an upset, of the fights the underdog won), with its round-by-round log at the top. To find the next one:
+`stories/` has fights from the arena written up as short stories, from every fighter's side: [Might Guy vs Guts](stories/guy-vs-guts.md), [Battle Beast vs Might Guy](stories/beast-vs-guy.md) , [Spike Spiegel vs Arthur Morgan](stories/spike-vs-arthur.md) its sequel, [Spike and Arthur vs Adam Smasher](stories/spike-arthur-vs-smasher.md), [Goblin Slayer vs Talion](stories/gs-vs-talion.md), [Link vs Jin Sakai](stories/link-vs-jin.md), [Kratos vs the Doom Slayer](stories/kratos-vs-slayer.md), [Alexander Anderson vs Guts](stories/anderson-vs-guts.md), two intermissions with no fight in them, [The Regulars](stories/intermission-the-regulars.md) and [Full House](stories/intermission-full-house.md), the first bout off the bartender's chalkboard, [Alexander Anderson vs Kratos](stories/anderson-vs-kratos.md), the Slayer's return, [Adam Smasher vs the Doom Slayer](stories/smasher-vs-slayer.md), and an exhibition with one rule on the slate, [Link vs Dark Link](stories/link-vs-dark-link.md). They share a continuity: a bar between worlds, where the old bartender pours what you need before you ask, and nobody who falls stays down for good. They wake up back at the counter. Each one is a real run, the most dramatic of a few hundred (or, for an upset, of the fights the underdog won), with its round-by-round log at the top. To find the next one:
 
     python stories/fight_log.py beast might-guy 400
 

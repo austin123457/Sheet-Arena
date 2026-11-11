@@ -23,6 +23,16 @@ def test_link_is_immune_under_nayrus_love():
     assert L.take(50, "slashing", "test", from_attack=True, melee=True) == 0
 
 
+def test_the_exhibition_link_never_casts_nayrus_love():
+    for _ in range(20):
+        L, s = make("link-no-nayru"), make("dark-link"); f = Fight([[L], [s]])
+        ot = L.turn
+        def turn(fight, ot=ot):
+            ot(fight); assert L.nayru == 0 and L.magic == 12
+        L.turn = turn; f.run()
+    assert make("link").no_nayru is False
+
+
 def test_night_guy_and_the_crucible_go_through_nayrus_love():
     L = make("link"); L.nayru = 5; L.reaction = False
     assert L.take(50, "force", "Night Guy", ignore_res=True, ignore_imm=True) == 50

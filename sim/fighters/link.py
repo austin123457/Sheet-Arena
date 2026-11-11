@@ -15,6 +15,7 @@ class Link(Combatant):
         self.saves = dict(Str=8, Dex=5, Con=9, Int=0, Wis=3, Cha=-1); self.indomitable = 3
         self.magic = 12; self.nayru = 0; self.fairies = 2; self.red = 1; self.blue = 1; self.surges = 2; self.sw = 4
         self.dice = 6; self.nuts = 10; self.triforce = True
+        self.no_nayru = False       # an exhibition rule: Nayru's Love stays in the pack (link-no-nayru)
 
     def init(self): return d(20) + 11
 
@@ -47,7 +48,7 @@ class Link(Combatant):
         actions = 1 + (1 if self.surges > 0 else 0)
         if self.surges > 0: self.surges -= 1
         for a in range(actions):
-            if self.nayru == 0 and self.magic >= 3 and tgt.danger >= 4:
+            if self.nayru == 0 and self.magic >= 3 and tgt.danger >= 4 and not self.no_nayru:
                 self.magic -= 3; self.nayru = 10; continue      # Nayru's Love takes the action
             first = False
             for i in range(4):
