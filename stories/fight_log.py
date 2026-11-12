@@ -4,11 +4,13 @@ the raw material for the stories in this folder.
     python stories/fight_log.py beast might-guy 400
     python stories/fight_log.py spike arthur 2000 Spike     # only fights Spike won
     python stories/fight_log.py spike+arthur smasher 400     # teams: join names with +
+    python stories/fight_log.py musashi alfa 3000 Musashi reactions     # the fight with the most steel on steel
 
-"Dramatic" scores long fights, Relentless Rage-style comebacks, Night Guy, and a winner left low.
+"Dramatic" scores long fights, Relentless Rage-style comebacks, Night Guy, and a winner left low. With "reactions"
+as the fifth argument it scores a duel instead: rounds, and every parry, dodge and cut made on the other one's turn.
 It wraps the engine's attack() and take() to record them; the fights themselves are the arena's own.
 A Reaction queued with fight.after_turn (a Riposte, Dark Link's Answer) lands once the turn is over:
-it's printed on the turn that drew it, after "then:". Anything that happens before the first turn (Jin's
+it's printed on the turn that drew it, after "then:". An attack made on somebody else's turn carries its maker's name. Anything that happens before the first turn (Jin's
 Standoff) is printed as R0, under the name of whoever attacked."""
 import os, sys, random
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -90,6 +92,7 @@ def run_one(a, b):
 a, b = sys.argv[1], sys.argv[2]
 n = int(sys.argv[3]) if len(sys.argv) > 3 else 400
 want = sys.argv[4] if len(sys.argv) > 4 else None      # a fighter's name: keep only fights their side won
+duel = len(sys.argv) > 5 and sys.argv[5] == "reactions"
 team = len(a.split("+")) + len(b.split("+")) > 2
 best = None
 for i in range(n):
@@ -100,6 +103,9 @@ for i in range(n):
     fallen = 0 if w is None else sum(c.out for c in (A, B)[w])        # a winner who lost someone on the way
     close = 0 if w is None else -sum(c.hp for c in (A, B)[w]) / 20
     score = r + 6 * night + 4 * relentless + 5 * fallen + close + random.random()
+    if duel:
+        answers = sum(1 for t in turns for e in t[4] if (e[0] == "atk" and e[1] != t[1]) or (e[0] == "note" and ("parr" in e[1].lower() or "Dodge" in e[1])))
+        score = 4 * r + answers + close + random.random()
     if best is None or score > best[0]:
         best = (score, w, r, turns, (A, B))
 if best is None: sys.exit(f"no fight in {n} went to {want}")
@@ -114,7 +120,7 @@ for rnd, name, before, after, events, hps in turns:
     for e in events:
         if e[0] == "atk":
             _, at, tg, dt, hit, crit, dealt, thp = e
-            bits.append(f"{'CRIT' if crit else 'hit' if hit else 'miss'}{'' if not hit else f' {dealt} {dt}'}{f' >{tg}' if team else ''}{f' ({at})' if team and at != name else ''}")
+            bits.append(f"{'CRIT' if crit else 'hit' if hit else 'miss'}{'' if not hit else f' {dealt} {dt}'}{f' >{tg}' if team else ''}{f' ({at})' if at != name else ''}")
         elif e[0] == "dmg":
             bits.append(f"[{e[1]} -> {e[2]}: {e[4]} {e[3]}]")
         elif e[0] == "note":

@@ -74,7 +74,10 @@ class Musashi(Combatant):
     def reduce_hit(self, dmg, melee):
         if melee and self.short and not self.incapacitated():      # Parry: the smacking parry
             r = self.die(spend=dmg >= 20 and self.dice > 2)
-            if r: self.short = False; return max(0, dmg - (r + 5))
+            if r:
+                self.short = False
+                if self.fight: self.fight.note(f"Musashi parries {min(dmg, r + 5)}")
+                return max(0, dmg - (r + 5))
         return dmg
 
     def on_missed(self, fight, att, melee):

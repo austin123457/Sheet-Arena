@@ -20,6 +20,7 @@ Every story from the arena, in the order it happened. Each one is a real sim run
 | 14 | [At Sixty Feet](musashi-vs-smasher.md) | Miyamoto Musashi vs Adam Smasher | Smasher, in 2 |
 | 15 | [What Decides It](jin-vs-smasher.md) | Jin Sakai vs Adam Smasher | Jin, in 8 |
 | 16 | [Expendable Assets](arthur-vs-jack.md) | Arthur Morgan vs Handsome Jack | Arthur, in 8 |
+| 17 | [The Smallest Cut](musashi-vs-alfa.md) | Miyamoto Musashi vs FLLFFL (Alfa) | Musashi, in 5 |
 
 Two bouts off the chalkboard were fought between 11 and 12 and never written up: Arthur and Guts beat Spike and Smasher, and Link beat Jin again. Their results are in the header of [Until It Is Done](smasher-vs-slayer.md).
 

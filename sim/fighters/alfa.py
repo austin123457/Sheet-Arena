@@ -78,7 +78,9 @@ class Alfa(Combatant):
 
     def reduce_hit(self, dmg, melee):
         if self.reaction and self.sees and (dmg >= self.dodge_at or not melee) and not self.incapacitated():      # Uncanny Dodge
-            self.reaction = False; return dmg // 2
+            self.reaction = False
+            if self.fight: self.fight.note("Alfa: Uncanny Dodge")
+            return dmg // 2
         return dmg
 
     def on_missed(self, fight, att, melee):
