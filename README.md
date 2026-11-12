@@ -2,7 +2,7 @@
 
 D&D 5e (2024 rules) character sheets for fictional characters, built canon-first, and a dice-driven arena that fights them against each other.
 
-Twenty fighters, one sheet each: Goblin Slayer, Guts, Kyle Crane, Itachi Uchiha, Adam Smasher, Jin Sakai, Might Guy (the canon merge), the Doom Slayer, Link the Hero of Time, Battle Beast, Alexander Anderson, Arthur Morgan, Spike Spiegel, Talion, V, Kratos, Miyamoto Musashi, Dark Link, Handsome Jack, and FLLFFL (Alfa, of the Rock Hard Gladiators). The sheets are PDFs in `sheets/pdf/`; the scripts that render the ones Claude built are in `sheets/build/` (reportlab). Caleb's sheets (Smasher, Jin, Crane v3, Battle Beast, Arthur, Talion v2) and Alfa's are PDFs only.
+Twenty fighters, one sheet each: Goblin Slayer, Guts, Kyle Crane, Itachi Uchiha, Adam Smasher, Jin Sakai, Might Guy (the canon merge), the Doom Slayer, Link the Hero of Time, Battle Beast, Alexander Anderson, Arthur Morgan, Spike Spiegel, Talion, V, Kratos, Miyamoto Musashi, Dark Link, Handsome Jack, and FLLFFL (Alfa, of the Rock Hard Gladiators). The sheets are PDFs in `sheets/pdf/`; the scripts that render the ones Claude built are in `sheets/build/` (reportlab). Caleb's sheets (Smasher, Jin, Crane v3, Battle Beast, Arthur, Talion v2, Alfa) are PDFs only.
 
 ## Run a fight
 
