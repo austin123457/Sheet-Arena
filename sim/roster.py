@@ -39,7 +39,7 @@ NAMES = {
     "slayer": "Slayer", "doomslayer": "Slayer", "link": "Link", "hero-of-time": "Link", "link-no-nayru": "Link-no-nayru", "beast": "Beast",
     "battle-beast": "Beast", "anderson": "Anderson", "arthur": "Arthur", "spike": "Spike", "talion": "Talion",
     "kratos": "Kratos", "musashi": "Musashi", "miyamoto-musashi": "Musashi", "dark-link": "Dark Link", "darklink": "Dark Link",
-    "dark-link-room": "Dark Link-room", "jack": "Jack", "handsome-jack": "Jack", "madara": "Madara", "piccolo": "Piccolo", "v": "V", "v-sandy": "V-sandy", "v-deck": "V-deck",
+    "dark-link-room": "Dark Link-room", "jack": "Jack", "handsome-jack": "Jack", "alfa": "Alfa", "fllffl": "Alfa", "madara": "Madara", "piccolo": "Piccolo", "v": "V", "v-sandy": "V-sandy", "v-deck": "V-deck",
 }
 
 

@@ -21,5 +21,6 @@ from .piccolo import Piccolo
 from .musashi import Musashi
 from .dark_link import DarkLink
 from .jack import Jack
+from .alfa import Alfa
 
-ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Musashi, DarkLink, Jack, Madara, Piccolo]
+ALL = [GoblinSlayer, Guts, Crane, Itachi, Smasher, Jin, Guy, Slayer, Link, BattleBeast, Anderson, Arthur, Spike, Talion, V, Kratos, Musashi, DarkLink, Jack, Alfa, Madara, Piccolo]

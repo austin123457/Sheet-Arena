@@ -320,3 +320,52 @@ def test_jack_cloaks_when_the_other_one_drew_first():
     assert j.wants_cloak(f, g) and j.wants_cloak(f, make("arthur"))
     f.round = 2
     assert not j.wants_cloak(f, g)
+
+
+def test_alfa_parries_a_blade_and_the_parry_stays_up_until_his_turn():
+    a, g = make("alfa"), make("guts"); Fight([[a], [g]])
+    assert a.defend_ac(g, 23, True, False) == 0 and a.reaction       # six wouldn't stop it: he keeps the Reaction
+    assert a.defend_ac(g, 19, False, False) == 0 and a.reaction      # nobody parries a bullet
+    assert a.defend_ac(g, 19, True, True) == 0 and a.reaction        # or a critical hit
+    assert a.defend_ac(g, 19, True, False) == 6 and a.parry and not a.reaction
+    assert a.defend_ac(g, 30, True, False) == 6                      # it's still up for the next blade
+    a.start_turn()
+    assert not a.parry and a.reaction
+
+
+def test_alfa_dodges_a_bullet_or_a_big_blade_he_can_see_coming():
+    a, g = make("alfa"), make("guts"); Fight([[a], [g]])
+    assert a.reduce_hit(12, True) == 12 and a.reaction               # a small cut isn't worth it
+    assert a.reduce_hit(12, False) == 6 and not a.reaction           # any bullet is
+    assert a.reduce_hit(40, True) == 40                              # one Reaction a round
+    a.start_turn()
+    assert a.reduce_hit(40, True) == 20
+    a.start_turn(); g.invisible = True
+    a.defend_ac(g, 30, False, False)
+    assert a.reduce_hit(40, False) == 40 and a.reaction              # he can't dodge what he can't see
+
+
+def test_alfa_ripostes_with_a_die_and_a_fresh_sneak_attack():
+    a, g = make("alfa"), make("guts"); f = Fight([[a], [g]]); f.round = 2
+    a.sa_used = True
+    a.on_missed(f, g, False)
+    assert a.reaction and a.dice == 5 and not f.pending              # a bullet that misses is only a miss
+    a.on_missed(f, g, True)
+    assert not a.reaction and a.dice == 4 and len(f.pending) == 1
+    hp = g.hp; g.ac = -50                                            # only a natural 1 misses now
+    while g.hp == hp: a.sa_used = True; a.edge.add(g.name); a.cut(f, g, riposte=True)      # with advantage (Vex)
+    assert a.sa_used and g.name in a.edge                            # the cut found its own Sneak Attack, and Vex
+
+
+def test_alfa_takes_the_sword_in_both_hands_against_a_mirror():
+    a = make("alfa"); f = Fight([[a], [make("guts")]]); a.before_first_round(f)
+    assert a.one_handed and all(11 <= a.steel() <= 18 for i in range(200))
+    a = make("alfa"); f = Fight([[a], [make("dark-link")]]); a.before_first_round(f)
+    assert not a.one_handed and all(9 <= a.steel() <= 18 for i in range(200))
+
+
+def test_the_jet_swords_flame_is_fire_and_not_steel():
+    a, an = make("alfa"), make("anderson"); f = Fight([[a], [an]]); f.round = 2
+    an.ac = -50
+    while not an.radiant_taken: a.cut(f, an)
+    assert 2 <= an.radiant_taken <= 24                               # the body that regrows feels the flame, not the edge

@@ -310,7 +310,7 @@ class Fight:
     def over(self):
         return len({c.team for c in self.all if c.alive() and not c.summon}) <= 1
     def run(self):
-        order = sorted(self.all, key=lambda c: c.init(), reverse=True)
+        order = sorted(self.all, key=lambda c: (c.init(), d(1000)), reverse=True)       # a tie is a coin toss, not whoever was named first
         for c in self.all: self.actor = c; c.before_first_round(self)
         if all(c.tier >= 2 for c in self.all):
             for c in self.all: c.legendary_resist = 0      # raid against raid: Legendary Resistance is a party-fight device, not a canon ability
